@@ -3,7 +3,7 @@
 "ServerUrl": "https://localhost:64580",
 "RedirectUrl": "",
 "LaunchCommand": "npm run dev",
-"WorkingDirectory": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\..\\practicumprojects.client",
+"WorkingDirectory": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\..\\practicumprojects.client",
 "MaxTimeoutInSeconds": "120",
 "KeepRunning": "false"
 }
