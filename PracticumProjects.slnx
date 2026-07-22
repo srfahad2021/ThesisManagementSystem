@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="practicumprojects.client/practicumprojects.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="PracticumProjects.Server/PracticumProjects.Server.csproj" />
+</Solution>
