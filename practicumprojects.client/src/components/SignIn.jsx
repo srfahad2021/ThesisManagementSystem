@@ -28,56 +28,50 @@ export default function SignInPage({ onSwitchToSignUp, onLoginSuccess }) {
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        // e.preventDefault();
-        // if (!username.trim() || !password) {
-        //     setError('Please enter both username and password.');
-        //     return;
-        // }
+    e.preventDefault();
+    if (!username.trim() || !password) {
+        setError('Please enter both username and password.');
+        return;
+    }
 
-        // setError('');
-        // setIsLoading(true);
+    setError('');
+    setIsLoading(true);
 
-        // try {
-        //     const response = await fetch('/api/auth/login', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             username: username.trim(),
-        //             password: password,
-        //             role: role,
-        //         }),
-        //     });
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username.trim(),
+                password: password,
+                role: role,
+            }),
+        });
 
-        //     const data = await response.json();
+        const data = await response.json();
 
-        //     if (!response.ok) {
-        //         throw new Error(data.message || 'Login failed. Please check your credentials.');
-        //     }
+        if (!response.ok) {
+            throw new Error(data.message || 'Login failed. Please check your credentials.');
+        }
 
-        //     // 1. SAVE THE JWT TOKEN & USER DATA
-        //     // Use localStorage (or sessionStorage if rememberMe is false)
-        //     const storage = rememberMe ? localStorage : sessionStorage;
-        //     storage.setItem('token', data.token);
-        //     storage.setItem('user', JSON.stringify(data.user));
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem('token', data.token);
+        storage.setItem('user', JSON.stringify(data.user));
 
-        //     // 2. HANDLE REDIRECT / STATE UPDATE
-        //     if (onLoginSuccess) {
-        //         // Pass the token and user to your parent handler
-        //         onLoginSuccess({ user: data.user, token: data.token, rememberMe });
-        //     }
+        if (onLoginSuccess) {
+            onLoginSuccess({ user: data.user, token: data.token, rememberMe });
+        }
 
-        //     // 3. NAVIGATE TO DASHBOARD
-        //     navigate('/dashboard');
+        navigate('/dashboard');
 
-        // } catch (err) {
-        //     setError(err.message);
-        // } finally {
-        //     setIsLoading(false);
-        // }
-        alert("kire?");
-    };
+    } catch (err) {
+        setError(err.message);
+    } finally {
+        setIsLoading(false);
+    }
+};
     return (
         <>
             <style>{`

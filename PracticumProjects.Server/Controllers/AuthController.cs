@@ -123,7 +123,7 @@ public class AuthController : ControllerBase
             claims: claims,
             expires: DateTime.UtcNow.AddHours(8),
             signingCredentials: creds
-        );
+        ); 
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

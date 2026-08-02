@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj": {}
+    "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj": {}
   },
   "projects": {
-    "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj": {
+    "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
+        "projectUniqueName": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
         "projectName": "PracticumProjects.Server",
-        "projectPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
+        "projectPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
         "packagesPath": "C:\\Users\\srfah\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\obj\\",
+        "outputPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

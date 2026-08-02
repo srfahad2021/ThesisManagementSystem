@@ -1,12 +1,71 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{48B76A16-B5D5-0C34-E9BC-DC19F81A1F00}|PracticumProjects.Server\\PracticumProjects.Server.csproj|c:\\users\\srfah\\source\\repos\\practicumprojects\\practicumprojects.server\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{48B76A16-B5D5-0C34-E9BC-DC19F81A1F00}|PracticumProjects.Server\\PracticumProjects.Server.csproj|solutionrelative:practicumprojects.server\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{48B76A16-B5D5-0C34-E9BC-DC19F81A1F00}|PracticumProjects.Server\\PracticumProjects.Server.csproj|c:\\users\\srfah\\source\\repos\\practicumprojects\\practicumprojects.server\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{48B76A16-B5D5-0C34-E9BC-DC19F81A1F00}|PracticumProjects.Server\\PracticumProjects.Server.csproj|solutionrelative:practicumprojects.server\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{14A17253-A411-FAB5-56F9-826045833722}|practicumprojects.client\\practicumprojects.client.esproj|c:\\users\\srfah\\source\\repos\\practicumprojects\\practicumprojects.client\\.vscode\\launch.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{14A17253-A411-FAB5-56F9-826045833722}|practicumprojects.client\\practicumprojects.client.esproj|solutionrelative:practicumprojects.client\\.vscode\\launch.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "WeatherForecastController.cs",
+              "DocumentMoniker": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\Controllers\\WeatherForecastController.cs",
+              "RelativeDocumentMoniker": "PracticumProjects.Server\\Controllers\\WeatherForecastController.cs",
+              "ToolTip": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\Controllers\\WeatherForecastController.cs",
+              "RelativeToolTip": "PracticumProjects.Server\\Controllers\\WeatherForecastController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T07:44:45.591Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "PracticumProjects.Server\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "PracticumProjects.Server\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T07:44:40.172Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "launch.json",
+              "DocumentMoniker": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.client\\.vscode\\launch.json",
+              "RelativeDocumentMoniker": "practicumprojects.client\\.vscode\\launch.json",
+              "ToolTip": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.client\\.vscode\\launch.json",
+              "RelativeToolTip": "practicumprojects.client\\.vscode\\launch.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-27T07:44:32.447Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

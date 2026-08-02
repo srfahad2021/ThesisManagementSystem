@@ -1,19 +1,13 @@
 import React from 'react';
-const TopNavbar = ({ 
-  activeRole = 'dept_admin', 
-  onRoleChange, 
-  pageTitle = 'dashboard', 
-  breadcrumb = `Home / ${pageTitle}`
-}) => {
-  const roles = [
-    { id: 'dept_admin', label: 'Dept Admin' },
-    { id: 'student', label: 'Student' },
-    { id: 'supervisor', label: 'Supervisor' },
-    { id: 'coordinator', label: 'Coordinator' },
-    { id: 'examiner', label: 'Examiner' },
-    { id: 'super_admin', label: 'Super Admin' },
-  ];
 
+const TopNavbar = ({ 
+  user,
+  activeRole = 'ADMIN', 
+  onRoleChange, 
+  pageTitle = 'Dashboard', 
+  breadcrumb = `Home / ${pageTitle}`,
+  onLogout
+}) => {
   return (
     <>
       {/* Embedded CSS Resets and Styles */}
@@ -45,6 +39,7 @@ const TopNavbar = ({
           --success: #22C55E;
           --warning: #F59E0B;
           --danger: #EF4444;
+          --danger-hover: #DC2626;
           --info: #3B82F6;
           --radius: 10px;
           --radius-sm: 6px;
@@ -84,6 +79,7 @@ const TopNavbar = ({
           font-weight: 600;
           font-size: 16px;
           color: var(--text-primary);
+          text-transform: capitalize;
         }
 
         .topbar-breadcrumb {
@@ -98,34 +94,27 @@ const TopNavbar = ({
           gap: 12px;
         }
 
-        .role-switcher-container {
+        .user-badge {
           display: flex;
-          gap: 6px;
-          flex-wrap: wrap;
-        }
-
-        .role-pill {
-          padding: 6px 14px;
+          align-items: center;
+          gap: 8px;
+          padding: 4px 10px;
+          background: var(--bg);
           border-radius: 20px;
           border: 1px solid var(--border);
           font-size: 12px;
           font-weight: 500;
-          cursor: pointer;
-          color: var(--text-secondary);
-          background: var(--bg-card);
-          transition: all 0.15s;
-          user-select: none;
+          color: var(--text-primary);
         }
 
-        .role-pill:hover {
-          border-color: var(--primary);
-          color: var(--primary);
-        }
-
-        .role-pill.active {
+        .role-tag {
+          font-size: 10px;
+          font-weight: 700;
           background: var(--primary);
           color: #fff;
-          border-color: var(--primary);
+          padding: 2px 6px;
+          border-radius: 10px;
+          text-transform: uppercase;
         }
 
         .icon-btn {
@@ -172,6 +161,36 @@ const TopNavbar = ({
           justify-content: center;
           font-weight: 700;
         }
+
+        /* Logout Button Styling */
+        .logout-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          height: 34px;
+          padding: 0 12px;
+          border-radius: var(--radius-sm);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          background: rgba(239, 68, 68, 0.05);
+          color: var(--danger);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .logout-btn svg {
+          width: 16px;
+          height: 16px;
+        }
+
+        .logout-btn:hover {
+          background: var(--danger);
+          color: #ffffff;
+          border-color: var(--danger);
+          box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+        }
       `}</style>
 
       {/* Navigation Topbar */}
@@ -183,7 +202,13 @@ const TopNavbar = ({
           </div>
 
           <div className="topbar-right">
-            
+            {/* Display logged-in user name & role */}
+            {user && (
+              <div className="user-badge">
+                <span>{user.firstName ? `${user.firstName}` : user.username}</span>
+                <span className="role-tag">{activeRole}</span>
+              </div>
+            )}
 
             {/* Notification Button */}
             <button className="icon-btn notif-dot" title="Notifications">
@@ -213,6 +238,19 @@ const TopNavbar = ({
                   d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
+            </button>
+
+            {/* Logout Button */}
+            <button className="logout-btn" title="Sign Out" onClick={onLogout}>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+              <span>Logout</span>
             </button>
           </div>
         </header>
