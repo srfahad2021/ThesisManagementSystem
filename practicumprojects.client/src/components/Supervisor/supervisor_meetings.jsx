@@ -7,12 +7,6 @@ import  {meetMgmtRow} from '../script.jsx';
 
 
 export default function supervisor_meetings() {
-  const currentRole ='dept_admin';
-  const currentPage ='dashboard';
-
-  useEffect(() => {
-    initCharts(currentPage);
-  }, [currentPage]);
 
   // Render active page dynamically
   const renderContent = () => {

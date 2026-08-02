@@ -36,17 +36,17 @@ export default function App({ page = 'dashboard' }) {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F7F6F3' }}>
             {/* 1. Left Navbar Fixed Sidebar (240px) */}
-            <LeftNavbar
-                currentRole={activeRole}
-                user={user}
-                onPageChange={({ pageId }) => setCurrentPage(pageId)}
-            />
+            (user & 
+                <LeftNavbar
+                    user={user}
+                    onPageChange={({ pageId }) => setCurrentPage(pageId)}
+                />
+            );
 
             {/* 2. Main Content Wrapper Offset by Sidebar Width */}
-            <div style={{ marginLeft: '240px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ marginLeft: '180px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <TopNavbar
                     user={user}
-                    activeRole={activeRole}
                     onRoleChange={(newRole) => setActiveRole(newRole)}
                     pageTitle={pageTitle}
                     breadcrumb={`Home / ${pageTitle}`}
@@ -55,7 +55,7 @@ export default function App({ page = 'dashboard' }) {
 
                 {/* 3. Main Body Offset by TopNavbar Height (56px) */}
                 <main style={{ 
-                    marginTop: '56px', 
+                    marginTop: '36px', 
                     padding: '24px', 
                     flex: 1, 
                     minHeight: 'calc(100vh - 56px)',

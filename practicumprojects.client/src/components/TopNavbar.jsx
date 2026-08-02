@@ -1,13 +1,29 @@
 import React from 'react';
 
+const roleNames = [
+  "ADMIN",
+  "COORDINATOR",
+  "CHAIRMAN",
+  "SUPERVISOR",
+  "STUDENT",
+  "EXAMINER",
+];
+
+export function getRoleName(role) {
+  return roleNames[role] ?? "UNKNOWN";
+}
+
 const TopNavbar = ({ 
   user,
-  activeRole = 'ADMIN', 
   onRoleChange, 
   pageTitle = 'Dashboard', 
   breadcrumb = `Home / ${pageTitle}`,
   onLogout
 }) => {
+  if(!user){
+    return null;
+  }
+  const activeRole = getRoleName(user?.role);
   return (
     <>
       {/* Embedded CSS Resets and Styles */}

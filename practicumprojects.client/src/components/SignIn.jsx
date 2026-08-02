@@ -18,8 +18,8 @@ const COLORS = {
 
 export default function SignInPage({ onSwitchToSignUp, onLoginSuccess }) {
     const [role, setRole] = useState('STUDENT');
-    const [username, setUsername] = useState('student');
-    const [password, setPassword] = useState('student');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);

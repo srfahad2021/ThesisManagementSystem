@@ -49,7 +49,9 @@ export default function coordinator_dashboard() {
     <div className="section-head">
       <div className="section-title">Thesis Lifecycle Status</div>
     </div>
-    <canvas id="lifecycleChart" height="200"></canvas>
+    <div style={{ position: 'relative', height: '220px', width: '100%' }}>
+              <canvas id="lifecycleChart"></canvas>
+            </div>
   </div>
 </div>
       </>

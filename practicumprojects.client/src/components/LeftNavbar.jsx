@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { roles, getPageLabel } from '../Information/RolesAndConfig.js';
-import {icons} from '../Information/Icons.jsx';
+
+const roleNames = [
+  "ADMIN",
+  "COORDINATOR",
+  "CHAIRMAN",
+  "SUPERVISOR",
+  "STUDENT",
+  "EXAMINER",
+];
+
+export function getRoleName(role) {
+  return roleNames[role] ?? "UNKNOWN";
+}
 
 
-export default function LeftNavbar({ currentRole, user, onPageChange }) {
+export default function LeftNavbar({user, onPageChange }) {
   const [currentPage, setCurrentPage] = useState('');
   // Grab active role configuration directly from imported roles
-  const roleData = roles[currentRole] || roles.dept_admin;
 
+  
   // 1. Auto-inject Google Fonts dynamically into document head
   useEffect(() => {
     const link = document.createElement('link');
@@ -15,7 +27,10 @@ export default function LeftNavbar({ currentRole, user, onPageChange }) {
     link.rel = 'stylesheet';
     document.head.appendChild(link);
   }, []);
-
+  
+  const currentRole = getRoleName(user?.role); 
+  const roleData = roles[currentRole] ?? roles.ADMIN;
+  
   // 2. Reset active page to first menu item whenever currentRole changes
   useEffect(() => {
     const firstPage = roleData.nav[0]?.items[0]?.id || '';
@@ -26,7 +41,7 @@ export default function LeftNavbar({ currentRole, user, onPageChange }) {
       onPageChange({ pageId: firstPage, role: currentRole });
     }
   }, [currentRole]);
-
+  
   // 3. Handle item clicks
   const handleNavigate = (pageId) => {
     setCurrentPage(pageId);
@@ -34,7 +49,8 @@ export default function LeftNavbar({ currentRole, user, onPageChange }) {
       onPageChange({ pageId, role: currentRole });
     }
   };
-
+  
+  if (!user) return null;
   return (
     <>
       <style>{`

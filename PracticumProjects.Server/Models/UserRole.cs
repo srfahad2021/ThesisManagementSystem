@@ -6,5 +6,6 @@ public enum UserRole
     COORDINATOR,
     CHAIRMAN,
     SUPERVISOR,
-    STUDENT
+    STUDENT,
+    EXAMINER
 }

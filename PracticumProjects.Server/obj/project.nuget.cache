@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+xCjgydXVes=",
+  "dgSpecHash": "m4A1NN0hUVg=",
   "success": true,
-  "projectFilePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
+  "projectFilePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\srfah\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
@@ -49,9 +49,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
-      "projectPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
+      "projectPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
+      "filePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
       "libraryId": "Microsoft.OpenApi",
       "targetGraphs": [
         "net10.0"
