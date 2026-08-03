@@ -20,7 +20,7 @@ const router = createBrowserRouter([
     {
         path: "dashboard",
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['ADMIN', 'COORDINATOR', 'CHAIRMAN', 'SUPERVISOR', 'STUDENT', 'EXAMINER']}>
                 <App />
             </ProtectedRoute>
         ),

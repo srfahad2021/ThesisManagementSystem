@@ -9,9 +9,6 @@ const roleNames = [
   "EXAMINER",
 ];
 
-export function getRoleName(role) {
-  return roleNames[role] ?? "UNKNOWN";
-}
 
 const TopNavbar = ({ 
   user,
@@ -23,7 +20,7 @@ const TopNavbar = ({
   if(!user){
     return null;
   }
-  const activeRole = getRoleName(user?.role);
+  const activeRole = user?.role;
   return (
     <>
       {/* Embedded CSS Resets and Styles */}

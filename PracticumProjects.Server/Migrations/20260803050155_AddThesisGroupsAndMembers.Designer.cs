@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PracticumProjects.Server.Data;
 
@@ -11,9 +12,11 @@ using PracticumProjects.Server.Data;
 namespace PracticumProjects.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260803050155_AddThesisGroupsAndMembers")]
+    partial class AddThesisGroupsAndMembers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,48 +24,6 @@ namespace PracticumProjects.Server.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("PracticumProjects.Models.Semester", b =>
-                {
-                    b.Property<int>("SemesterId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("semester_id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("SemesterId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("end_date");
-
-                    b.Property<string>("SemesterType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("semester_type");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("start_date");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("status");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int")
-                        .HasColumnName("year");
-
-                    b.HasKey("SemesterId");
-
-                    b.ToTable("semesters");
-                });
 
             modelBuilder.Entity("PracticumProjects.Server.Models.GroupMember", b =>
                 {
@@ -112,10 +73,6 @@ namespace PracticumProjects.Server.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("group_name");
 
-                    b.Property<int?>("SemesterId")
-                        .HasColumnType("int")
-                        .HasColumnName("semester_id");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -123,8 +80,6 @@ namespace PracticumProjects.Server.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("GroupId");
-
-                    b.HasIndex("SemesterId");
 
                     b.ToTable("thesis_groups");
                 });
@@ -146,9 +101,6 @@ namespace PracticumProjects.Server.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("longtext");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsProfileCompleted")
                         .HasColumnType("tinyint(1)");
@@ -214,16 +166,6 @@ namespace PracticumProjects.Server.Migrations
                     b.Navigation("Supervisor");
 
                     b.Navigation("ThesisGroup");
-                });
-
-            modelBuilder.Entity("PracticumProjects.Server.Models.ThesisGroup", b =>
-                {
-                    b.HasOne("PracticumProjects.Models.Semester", "Semester")
-                        .WithMany()
-                        .HasForeignKey("SemesterId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Semester");
                 });
 
             modelBuilder.Entity("PracticumProjects.Server.Models.ThesisGroup", b =>

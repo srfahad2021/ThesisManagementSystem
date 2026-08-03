@@ -44,7 +44,7 @@ export default function DynamicPageShower({ user, currentPage }) {
     }
     // Render view components based on currentPage ID sent from LeftNavbar
     const renderPageContent = () => {
-        if(user.role === 0){
+        if(user.role === "ADMIN"){
             switch (currentPage) {
                 case 'users':
                     return <Users user={user}/>;
@@ -75,12 +75,11 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>
                             <h2>{currentPage.toUpperCase()} View</h2>
-                            <p>Active Role: {currentRole}</p>
                         </div>
                     );
             }
         }
-        else if(user.role === 1){
+        else if(user.role === "COORDINATOR"){
             switch (currentPage) {
                 case 'dashboard':
                     return <Coordinator_dashboard user={user}/>;
@@ -97,15 +96,14 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>
                             <h2>{currentPage.toUpperCase()} View</h2>
-                            <p>Active Role: {currentRole}</p>
                         </div>
                     );
                 }
         }
-        else if(user.role == 2){
+        else if(user.role == "CHAIRMAN"){
             // ekn o ready kori nai
         }
-        else if(user.role == 3){
+        else if(user.role == "SUPERVISOR"){
             // supervisor
              switch (currentPage) {
                 case 'dashboard':
@@ -124,12 +122,11 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>
                             <h2>{currentPage.toUpperCase()} View</h2>
-                            <p>Active Role: {currentRole}</p>
                         </div>
                     );
             }
         }
-        else if(user.role === 4){
+        else if(user.role === "STUDENT"){
             switch (currentPage) {
                 case 'dashboard':
                     return <Student_dashboard user={user}/>;
@@ -149,7 +146,6 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>
                             <h2>{currentPage.toUpperCase()} View</h2>
-                            <p>Active Role: {currentRole}</p>
                         </div>
                     );
             }
@@ -167,7 +163,6 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>
                             <h2>{currentPage.toUpperCase()} View</h2>
-                            <p>Active Role: {currentRole}</p>
                         </div>
                     );
             }

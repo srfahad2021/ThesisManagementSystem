@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 
-export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSubmitBulk }) {
+export default function UserCreatePopup({ isOpen, onClose, onSuccess }) {
   const [activeTab, setActiveTab] = useState('single'); // 'single' | 'bulk'
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Single User Form State
+  // Single User Form State (Only username is required)
   const [formData, setFormData] = useState({
     username: '',
     fullName: '',
@@ -28,18 +30,95 @@ export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSub
     }
   };
 
-  const handleSingleSubmit = (e) => {
+  const getAuthToken = () => sessionStorage.getItem('token');
+  // Handle Single User Creation API call
+  const handleSingleSubmit = async (e) => {
     e.preventDefault();
-    if (onSubmitSingle) onSubmitSingle(formData);
-    onClose();
+    setErrorMessage('');
+    setLoading(true);
+
+    let firstName = '';
+    let lastName = '';
+    if (formData.fullName.trim()) {
+      const parts = formData.fullName.trim().split(' ');
+      firstName = parts[0];
+      if (parts.length > 1) lastName = parts.slice(1).join(' ');
+    }
+
+    // Role mapping
+    const roleMapping = {
+      Student: 'STUDENT',
+      Supervisor: 'SUPERVISOR',
+      Coordinator: 'COORDINATOR',
+      Examiner: 'EXAMINER'
+    };
+
+    const payload = {
+      username: formData.username.trim(),
+      email: formData.email.trim() || null,
+      firstName: firstName || null,
+      lastName: lastName || null,
+      role: roleMapping[formData.role] || 'STUDENT'
+    };
+
+    try {
+      const response = await fetch('/api/auth/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create user');
+      }
+
+      if (onSuccess) onSuccess(data);
+      onClose();
+    } catch (err) {
+      setErrorMessage(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleBulkSubmit = (e) => {
+  // Handle Bulk User Import API call
+  const handleBulkSubmit = async (e) => {
     e.preventDefault();
-    if (onSubmitBulk && selectedFile) {
-      onSubmitBulk(selectedFile);
+    if (!selectedFile) return;
+
+    setErrorMessage('');
+    setLoading(true);
+
+    const bodyData = new FormData();
+    bodyData.append('file', selectedFile);
+
+    try {
+      const response = await fetch('/api/auth/bulk-create', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`
+        },
+        body: bodyData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to process bulk upload');
+      }
+
+      if (onSuccess) onSuccess(data);
+      onClose();
+    } catch (err) {
+      setErrorMessage(err.message);
+    } finally {
+      setLoading(false);
     }
-    onClose();
   };
 
   return (
@@ -54,7 +133,7 @@ export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSub
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
+        zIndex: 1000
       }}
     >
       <div className="card" style={{ width: '520px', maxWidth: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
@@ -68,6 +147,15 @@ export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSub
             ✕
           </button>
         </div>
+
+        {/* Error Alert */}
+        {errorMessage && (
+          <div className="comment-box" style={{ borderColor: 'var(--danger)', background: '#FEE2E2', marginBottom: '16px' }}>
+            <div className="comment-text" style={{ color: 'var(--danger)' }}>
+              {errorMessage}
+            </div>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="tabs">
@@ -89,20 +177,9 @@ export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSub
         {activeTab === 'single' && (
           <form onSubmit={handleSingleSubmit}>
             <div className="form-group">
-              <label className="form-label">Full Name</label>
-              <input
-                type="text"
-                name="fullName"
-                className="form-control"
-                placeholder="e.g. SR Fahad"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Username / University ID</label>
+              <label className="form-label">
+                Username / University ID <span style={{ color: 'var(--danger)' }}>*</span>
+              </label>
               <input
                 type="text"
                 name="username"
@@ -115,7 +192,19 @@ export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSub
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label">Full Name (Optional)</label>
+              <input
+                type="text"
+                name="fullName"
+                className="form-control"
+                placeholder="e.g. SR Fahad"
+                value={formData.fullName}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Email Address (Optional)</label>
               <input
                 type="email"
                 name="email"
@@ -123,7 +212,6 @@ export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSub
                 placeholder="e.g. fahad@iubat.edu"
                 value={formData.email}
                 onChange={handleInputChange}
-                required
               />
             </div>
 
@@ -160,11 +248,11 @@ export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSub
 
             {/* Actions */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
-              <button type="button" className="btn-secondary" onClick={onClose}>
+              <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
                 Cancel
               </button>
-              <button type="submit" className="btn-primary">
-                Create Account
+              <button type="submit" className="btn-primary" disabled={loading}>
+                {loading ? 'Creating...' : 'Create Account'}
               </button>
             </div>
           </form>
@@ -174,37 +262,37 @@ export default function UserCreatePopup({ isOpen, onClose, onSubmitSingle, onSub
         {activeTab === 'bulk' && (
           <form onSubmit={handleBulkSubmit}>
             <div className="form-group">
-              <label className="form-label">Upload File (.csv, .xls, .xlsm)</label>
+              <label className="form-label">Upload File (.csv, .xls, .xlsm, .xlsx)</label>
               <input
                 type="file"
                 className="form-control"
-                accept=".csv, .xls, .xlsm, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept=".csv, .xls, .xlsm, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 onChange={handleFileChange}
                 required
               />
               <div className="text-muted text-sm mt-16" style={{ marginTop: '6px' }}>
-                Supported file types: <strong>.csv</strong>, <strong>.xls</strong>, <strong>.xlsm</strong>
+                Supported formats: <strong>.csv</strong>, <strong>.xls</strong>, <strong>.xlsx</strong>, <strong>.xlsm</strong>
               </div>
             </div>
 
             <div className="comment-box" style={{ marginTop: '16px' }}>
               <div className="comment-header">
-                <span className="comment-author">Expected Columns:</span>
+                <span className="comment-author">Expected Spreadsheet Headers:</span>
               </div>
               <div className="comment-text">
-                Ensure your spreadsheet has the following column headers:
+                Only <strong>Username</strong> and <strong>Role</strong> is required per row:
                 <br />
-                <code>Username, FullName, Email, Role, Semester</code>
+                <code>Username, FullName, Email, Role, Password</code>
               </div>
             </div>
 
             {/* Actions */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
-              <button type="button" className="btn-secondary" onClick={onClose}>
+              <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
                 Cancel
               </button>
-              <button type="submit" className="btn-primary" disabled={!selectedFile}>
-                Upload & Import
+              <button type="submit" className="btn-primary" disabled={!selectedFile || loading}>
+                {loading ? 'Uploading...' : 'Upload & Import'}
               </button>
             </div>
           </form>

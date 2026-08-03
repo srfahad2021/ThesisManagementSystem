@@ -1,3 +1,4 @@
+// File: PracticumProjects.Server\Models\User.cs
 namespace PracticumProjects.Server.Models;
 
 public class User
@@ -12,6 +13,8 @@ public class User
     public string? LastName { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
+
+    public bool IsActive { get; set; } = true; // Added for soft delete / disabling login
 
     public bool IsProfileCompleted { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

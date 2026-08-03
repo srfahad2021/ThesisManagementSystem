@@ -28,7 +28,7 @@ export default function LeftNavbar({user, onPageChange }) {
     document.head.appendChild(link);
   }, []);
   
-  const currentRole = getRoleName(user?.role); 
+  const currentRole = user?.role; 
   const roleData = roles[currentRole] ?? roles.ADMIN;
   
   // 2. Reset active page to first menu item whenever currentRole changes

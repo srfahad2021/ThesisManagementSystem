@@ -7,6 +7,9 @@ C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\PracticumProjects.Server.runtimeconfig.json
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\PracticumProjects.Server.dll
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\PracticumProjects.Server.pdb
+C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\BCrypt-Net-Next.dll
+C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\ExcelDataReader.dll
+C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\ExcelDataReader.DataSet.dll
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\Humanizer.dll
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
@@ -132,4 +135,3 @@ C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\obj\Debug
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\obj\Debug\net10.0\PracticumProjects.Server.pdb
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\obj\Debug\net10.0\PracticumProjects.Server.genruntimeconfig.cache
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\obj\Debug\net10.0\ref\PracticumProjects.Server.dll
-C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\BCrypt-Net-Next.dll

@@ -60,12 +60,22 @@ export function groupAttentionRow(group, students, issue, type) {
   );
 }
 
-export function userRow(username, name, role, email, status, lastLogin) {
+export function userRow(username, name, role, email, status, lastLogin, onEdit, onDisable) {
   const sc = status === 'Active' ? 'badge-success' : 'badge-neutral';
-  const rc = role === 'Student' ? 'badge-info' : role === 'Supervisor' ? 'badge-primary' : role === 'Coordinator' ? 'badge-warning' : 'badge-neutral';
+  const rc = role === 'Student' ? 'badge-info' 
+           : role === 'Supervisor' ? 'badge-primary' 
+           : role === 'Coordinator' ? 'badge-warning' 
+           : 'badge-neutral';
+
+  const isDisabled = status === 'Disabled' || status === 'Inactive';
+
   return (
-    <tr>
-      <td><code style={{ fontSize: '11px', background: '#F3F4F6', padding: '2px 6px', borderRadius: '4px' }}>{username}</code></td>
+    <tr key={username}>
+      <td>
+        <code style={{ fontSize: '11px', background: '#F3F4F6', padding: '2px 6px', borderRadius: '4px' }}>
+          {username}
+        </code>
+      </td>
       <td><strong>{name}</strong></td>
       <td><span className={`badge ${rc}`}>{role}</span></td>
       <td style={{ color: 'var(--text-secondary)' }}>{email}</td>
@@ -73,8 +83,19 @@ export function userRow(username, name, role, email, status, lastLogin) {
       <td style={{ color: 'var(--text-muted)' }}>{lastLogin}</td>
       <td>
         <div style={{ display: 'flex', gap: '6px' }}>
-          <button className="btn-secondary btn-sm">Edit</button>
-          <button className="btn-secondary btn-sm" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}>Disable</button>
+          <button className="btn-secondary btn-sm" onClick={onEdit}>
+            Edit
+          </button>
+          <button 
+            className="btn-secondary btn-sm" 
+            style={{ 
+              color: isDisabled ? 'var(--success, #10B981)' : 'var(--danger)', 
+              borderColor: isDisabled ? 'var(--success, #10B981)' : 'var(--danger)' 
+            }}
+            onClick={onDisable}
+          >
+            {isDisabled ? 'Enable' : 'Disable'}
+          </button>
         </div>
       </td>
     </tr>

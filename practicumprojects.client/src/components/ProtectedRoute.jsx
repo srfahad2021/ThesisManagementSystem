@@ -3,8 +3,8 @@ import { Navigate } from 'react-router-dom';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
     // Check both storage options based on "Keep me signed in" choice
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const userJson = localStorage.getItem('user') || sessionStorage.getItem('user');
+    const token = sessionStorage.getItem('token');
+    const userJson = sessionStorage.getItem('user');
 
     // 1. Not logged in -> Redirect to Sign In
     if (!token || !userJson) {
