@@ -1,4 +1,4 @@
-import { icons } from './icons.jsx';
+import { icons } from './Icons.jsx';
 
 export const roles = {
   ADMIN: {

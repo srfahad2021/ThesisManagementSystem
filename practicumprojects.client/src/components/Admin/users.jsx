@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../style.css';
 import { miniStat, userRow } from '../script.jsx';
-import UserCreatePopup from './UserCreatePopup.jsx';
+import UserCreatePopup from './userCreatePopup.jsx';
 import UserEditPopup from './UserEditPopup.jsx';
 
 export default function Users() {
