@@ -15,7 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
 
-// JWT Authentication setup
+// JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -23,8 +23,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    // Add this to prevent ASP.NET Core from rewriting claim types behind the scenes
-    options.MapInboundClaims = false; 
+    options.MapInboundClaims = false;
 
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -32,46 +31,65 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
+
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-        
-        // Add this so [Authorize(Roles = "ADMIN")] knows which claim to read
+
         RoleClaimType = System.Security.Claims.ClaimTypes.Role
     };
 });
 
 builder.Services.AddAuthorization();
 
-// Controllers
+// JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter());
     });
 
-// OpenAPI
+// OpenAPI / Swagger
 builder.Services.AddOpenApi();
 
-var app = builder.Build();
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
-app.UseDefaultFiles();
-app.MapStaticAssets();
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    // Keep local SPA integration working
+    app.UseDefaultFiles();
+    app.MapStaticAssets();
 }
 
 app.UseHttpsRedirection();
 
-// NOTE: Authentication MUST come before Authorization
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapFallbackToFile("/index.html");
+if (app.Environment.IsDevelopment())
+{
+    app.MapFallbackToFile("/index.html");
+}
 
 app.Run();
