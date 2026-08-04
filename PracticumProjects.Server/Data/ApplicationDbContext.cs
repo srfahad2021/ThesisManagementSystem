@@ -12,11 +12,14 @@ public class ApplicationDbContext : DbContext
     public DbSet<ThesisGroup> ThesisGroups => Set<ThesisGroup>();
     public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
     public DbSet<Semester> Semesters => Set<Semester>();
+    public DbSet<TopicSubmission> TopicSubmissions => Set<TopicSubmission>();
+    public DbSet<SubmissionFile> SubmissionFiles => Set<SubmissionFile>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        // --- User Configuration ---
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.UserId);
@@ -31,6 +34,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(100);
         });
 
+        // --- Semester Configuration ---
         modelBuilder.Entity<Semester>(entity =>
         {
             entity.HasKey(e => e.SemesterId);
@@ -44,6 +48,7 @@ public class ApplicationDbContext : DbContext
                   .HasMaxLength(20);
         });
 
+        // --- ThesisGroup Configuration ---
         modelBuilder.Entity<ThesisGroup>(entity =>
         {
             entity.HasKey(e => e.GroupId);
@@ -63,6 +68,7 @@ public class ApplicationDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // --- GroupMember Configuration ---
         modelBuilder.Entity<GroupMember>(entity =>
         {
             entity.HasKey(m => m.GroupId);
@@ -81,6 +87,34 @@ public class ApplicationDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(m => m.SupervisorId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // --- TopicSubmission Configuration ---
+        modelBuilder.Entity<TopicSubmission>(entity =>
+        {
+            entity.HasKey(t => t.TopicId);
+
+            entity.Property(t => t.Status)
+                  .HasConversion<string>()
+                  .HasMaxLength(30);
+
+            entity.HasOne<ThesisGroup>()
+                  .WithMany()
+                  .HasForeignKey(t => t.GroupId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // --- SubmissionFile Configuration ---
+        modelBuilder.Entity<SubmissionFile>(entity =>
+        {
+            entity.HasKey(f => f.FileId);
+
+            entity.Property(f => f.ModuleType)
+                  .HasConversion<string>()
+                  .HasMaxLength(30);
+
+            // Composite index for fast lookups by module and record ID
+            entity.HasIndex(f => new { f.ModuleType, f.EntityId });
         });
     }
 }

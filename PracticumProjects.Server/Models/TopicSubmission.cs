@@ -37,9 +37,6 @@ namespace PracticumProjects.Server.Models
         [Column("objectives")]
         public string Objectives { get; set; } = string.Empty;
 
-        [Column("methodology")]
-        public string? Methodology { get; set; }
-
         [Column("status")]
         public TopicStatus Status { get; set; } = TopicStatus.DRAFT;
 

@@ -4,6 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PracticumProjects.Server.Models
 {
+    public enum AttachmentModule
+    {
+        TopicSubmission,
+        Assignment,
+        WeeklyReport,
+        Exam
+    }
+
     [Table("submission_files")]
     public class SubmissionFile
     {
@@ -11,11 +19,18 @@ namespace PracticumProjects.Server.Models
         [Column("file_id")]
         public int FileId { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        [Column("entity_type")]
-        public string EntityType { get; set; } = string.Empty; // e.g., "WEEKLY_REPORT", "TOPIC_SUBMISSION"
+        /// <summary>
+        /// Identifies the parent module: TopicSubmission, Assignment, WeeklyReport, Exam, etc.
+        /// </summary>
 
+        [Required]
+        [Column("module_type")]
+        public AttachmentModule ModuleType { get; set; }
+
+        /// <summary>
+        /// The primary key ID of the parent record (e.g., TopicId, AssignmentId, WeeklyReportId, ExamId).
+        /// </summary>
+        [Required]
         [Column("entity_id")]
         public int EntityId { get; set; }
 
@@ -25,17 +40,16 @@ namespace PracticumProjects.Server.Models
         public string FileName { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(512)]
+        [MaxLength(500)]
         [Column("file_path")]
         public string FilePath { get; set; } = string.Empty;
 
-        [Required]
         [MaxLength(100)]
-        [Column("file_type")]
-        public string FileType { get; set; } = string.Empty;
+        [Column("content_type")]
+        public string? ContentType { get; set; }
 
-        [Column("file_size_bytes")]
-        public long FileSizeBytes { get; set; }
+        [Column("file_size")]
+        public long FileSize { get; set; }
 
         [Column("uploaded_at")]
         public DateTimeOffset UploadedAt { get; set; } = DateTimeOffset.UtcNow;

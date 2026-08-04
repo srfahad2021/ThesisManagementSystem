@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace PracticumProjects.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Route("api/ThesisGroup")] // Supports both /api/Group and /api/ThesisGroup calls
 [Authorize]
 public class GroupController : ControllerBase
 {
@@ -23,6 +25,112 @@ public class GroupController : ControllerBase
         public int? StudentId1 { get; set; }
         public int? StudentId2 { get; set; }
         public int? SupervisorId { get; set; }
+    }
+
+    /// <summary>
+    /// GET: api/Group/my-groups or api/ThesisGroup/my-groups
+    /// Retrieves all thesis groups assigned to the currently authenticated user (as student or supervisor).
+    /// </summary>
+    [HttpGet("my-groups")]
+    public async Task<IActionResult> GetMyGroups()
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null)
+        {
+            return Unauthorized(new { message = "User is not authenticated." });
+        }
+
+        var groups = await _context.ThesisGroups
+            .Include(g => g.GroupMember)
+                .ThenInclude(m => m!.Student1)
+            .Include(g => g.GroupMember)
+                .ThenInclude(m => m!.Student2)
+            .Include(g => g.GroupMember)
+                .ThenInclude(m => m!.Supervisor)
+            .Where(g => g.GroupMember != null &&
+                       (g.GroupMember.StudentId1 == userId.Value ||
+                        g.GroupMember.StudentId2 == userId.Value ||
+                        g.GroupMember.SupervisorId == userId.Value))
+            .OrderByDescending(g => g.GroupId)
+            .Select(g => new
+            {
+                g.GroupId,
+                g.GroupName,
+                Status = g.Status.ToString(),
+                g.CreatedAt,
+                CurrentUserId = userId.Value, // Included user ID for frontend usage
+                Student1 = g.GroupMember != null && g.GroupMember.Student1 != null ? new
+                {
+                    g.GroupMember.Student1.UserId,
+                    g.GroupMember.Student1.Username,
+                    FullName = $"{g.GroupMember.Student1.FirstName} {g.GroupMember.Student1.LastName}".Trim()
+                } : null,
+                Student2 = g.GroupMember != null && g.GroupMember.Student2 != null ? new
+                {
+                    g.GroupMember.Student2.UserId,
+                    g.GroupMember.Student2.Username,
+                    FullName = $"{g.GroupMember.Student2.FirstName} {g.GroupMember.Student2.LastName}".Trim()
+                } : null,
+                Supervisor = g.GroupMember != null && g.GroupMember.Supervisor != null ? new
+                {
+                    g.GroupMember.Supervisor.UserId,
+                    g.GroupMember.Supervisor.Username,
+                    FullName = $"{g.GroupMember.Supervisor.FirstName} {g.GroupMember.Supervisor.LastName}".Trim()
+                } : null
+            })
+            .ToListAsync();
+
+        return Ok(groups);
+    }
+
+    /// <summary>
+    /// GET: api/Group/user/{userId} or api/ThesisGroup/user/{userId}
+    /// Retrieves all thesis groups assigned to a specific user ID.
+    /// </summary>
+    [HttpGet("user/{userId:int}")]
+    public async Task<IActionResult> GetGroupsByUserId(int userId)
+    {
+        var groups = await _context.ThesisGroups
+            .Include(g => g.GroupMember)
+                .ThenInclude(m => m!.Student1)
+            .Include(g => g.GroupMember)
+                .ThenInclude(m => m!.Student2)
+            .Include(g => g.GroupMember)
+                .ThenInclude(m => m!.Supervisor)
+            .Where(g => g.GroupMember != null &&
+                       (g.GroupMember.StudentId1 == userId ||
+                        g.GroupMember.StudentId2 == userId ||
+                        g.GroupMember.SupervisorId == userId))
+            .OrderByDescending(g => g.GroupId)
+            .Select(g => new
+            {
+                g.GroupId,
+                g.GroupName,
+                Status = g.Status.ToString(),
+                g.CreatedAt,
+                UserId = userId,
+                Student1 = g.GroupMember != null && g.GroupMember.Student1 != null ? new
+                {
+                    g.GroupMember.Student1.UserId,
+                    g.GroupMember.Student1.Username,
+                    FullName = $"{g.GroupMember.Student1.FirstName} {g.GroupMember.Student1.LastName}".Trim()
+                } : null,
+                Student2 = g.GroupMember != null && g.GroupMember.Student2 != null ? new
+                {
+                    g.GroupMember.Student2.UserId,
+                    g.GroupMember.Student2.Username,
+                    FullName = $"{g.GroupMember.Student2.FirstName} {g.GroupMember.Student2.LastName}".Trim()
+                } : null,
+                Supervisor = g.GroupMember != null && g.GroupMember.Supervisor != null ? new
+                {
+                    g.GroupMember.Supervisor.UserId,
+                    g.GroupMember.Supervisor.Username,
+                    FullName = $"{g.GroupMember.Supervisor.FirstName} {g.GroupMember.Supervisor.LastName}".Trim()
+                } : null
+            })
+            .ToListAsync();
+
+        return Ok(groups);
     }
 
     /// <summary>
@@ -106,7 +214,8 @@ public class GroupController : ControllerBase
 
     /// <summary>
     /// POST: api/group
-    /// Creates a new thesis group with automatic naming ("G-01", "G-02", etc.).
+    /// Creates a new thesis group with automatic naming ("G-01", "G-02", etc.)
+    /// and initializes an empty topic submission in INITIAL state.
     /// </summary>
     [HttpPost]
     [Authorize(Roles = "ADMIN,COORDINATOR")]
@@ -145,13 +254,30 @@ public class GroupController : ControllerBase
         };
 
         _context.GroupMembers.Add(member);
+
+        // Automatically initialize an empty Topic Submission in INITIAL state
+        var initialTopic = new TopicSubmission
+        {
+            GroupId = group.GroupId,
+            Title = string.Empty,
+            Abstract = string.Empty,
+            Keywords = string.Empty,
+            ProblemStatement = string.Empty,
+            Objectives = string.Empty,
+            Status = TopicStatus.INITIAL,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+
+        _context.TopicSubmissions.Add(initialTopic);
         await _context.SaveChangesAsync();
 
         return Ok(new
         {
-            message = $"Group '{autoGroupName}' created successfully.",
+            message = $"Group '{autoGroupName}' created successfully with an initial topic submission.",
             groupId = group.GroupId,
-            groupName = group.GroupName
+            groupName = group.GroupName,
+            topicId = initialTopic.TopicId
         });
     }
 
@@ -173,5 +299,19 @@ public class GroupController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(new { message = $"Group '{group.GroupName}' deleted successfully." });
+    }
+
+    // Helper: Resolves authenticated User ID from JWT claims
+    private int? GetCurrentUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                 ?? User.FindFirst("UserId")?.Value
+                 ?? User.FindFirst("sub")?.Value;
+
+        if (int.TryParse(claim, out var userId))
+        {
+            return userId;
+        }
+        return null;
     }
 }

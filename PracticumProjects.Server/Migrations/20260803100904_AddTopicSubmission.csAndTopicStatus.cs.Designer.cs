@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PracticumProjects.Server.Data;
 
@@ -11,9 +12,11 @@ using PracticumProjects.Server.Data;
 namespace PracticumProjects.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260803100904_AddTopicSubmission.csAndTopicStatus.cs")]
+    partial class AddTopicSubmissioncsAndTopicStatuscs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,14 +105,15 @@ namespace PracticumProjects.Server.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("FileId"));
 
-                    b.Property<string>("ContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("content_type");
-
                     b.Property<int>("EntityId")
                         .HasColumnType("int")
                         .HasColumnName("entity_id");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("entity_type");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -119,19 +123,19 @@ namespace PracticumProjects.Server.Migrations
 
                     b.Property<string>("FilePath")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)")
                         .HasColumnName("file_path");
 
-                    b.Property<long>("FileSize")
+                    b.Property<long>("FileSizeBytes")
                         .HasColumnType("bigint")
-                        .HasColumnName("file_size");
+                        .HasColumnName("file_size_bytes");
 
-                    b.Property<string>("ModuleType")
+                    b.Property<string>("FileType")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)")
-                        .HasColumnName("module_type");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("file_type");
 
                     b.Property<DateTimeOffset>("UploadedAt")
                         .HasColumnType("datetime(6)")
@@ -139,7 +143,7 @@ namespace PracticumProjects.Server.Migrations
 
                     b.HasKey("FileId");
 
-                    b.HasIndex("ModuleType", "EntityId");
+                    b.HasIndex("EntityType", "EntityId");
 
                     b.ToTable("submission_files");
                 });

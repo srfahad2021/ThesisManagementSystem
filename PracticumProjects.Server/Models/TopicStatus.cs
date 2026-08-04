@@ -7,6 +7,7 @@ namespace PracticumProjects.Server.Models
         SUPERVISOR_REVIEW,
         APPROVED,
         REJECTED,
-        NEEDS_REVISION
+        NEEDS_REVISION, 
+        INITIAL
     }
 }
