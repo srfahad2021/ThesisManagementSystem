@@ -1,19 +1,26 @@
-# ---------- Build Stage ----------
+# ==========================
+# Build Stage
+# ==========================
 FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
 
 WORKDIR /src
 
-# Copy everything from the server folder
+# Copy the entire repository
 COPY . .
 
-# Restore packages
-RUN dotnet restore PracticumProjects.Server.csproj
+# Restore
+RUN dotnet restore "PracticumProjects.Server/PracticumProjects.Server.csproj"
 
 # Publish
-RUN dotnet publish PracticumProjects.Server.csproj -c Release -o /app/publish
+RUN dotnet publish "PracticumProjects.Server/PracticumProjects.Server.csproj" \
+    -c Release \
+    -o /app/publish \
+    /p:UseAppHost=false
 
-# ---------- Runtime Stage ----------
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview
+# ==========================
+# Runtime Stage
+# ==========================
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS final
 
 WORKDIR /app
 
