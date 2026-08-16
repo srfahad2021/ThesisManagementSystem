@@ -14,12 +14,18 @@ import Reports from './Admin/reports.jsx';
 import Topics from './Admin/topics.jsx';
 import Boards from './Admin/Boards.jsx';
 import GroupsAssign from './Admin/group_assign_board.jsx'
+import Admin_eval_request from './Admin/admin_eval_request.jsx';
+import Admin_notice from './Admin/admin_notice.jsx'
 
 import Coordinator_ai from './Coordinator/coordinator_ai.jsx';
 import Coordinator_dashboard from './Coordinator/coordinator_dashboard.jsx';
 import Coordinator_examiners from './Coordinator/coordinator_examiners.jsx';
 import Coordinator_groups from './Coordinator/coordinator_groups.jsx';
 import Coordinator_reports from './Coordinator/coordinator_reports.jsx';
+import Coordinator_ex_dashboard from './Coordinator/coordinator_ex_dashboard.jsx';
+import Coordinator_ex_evaluate from './Coordinator/coordinator_ex_evaluate.jsx';
+import Coordinator_ex_reports from './Coordinator/coordinator_ex_reports.jsx';
+import Coordinator_notice from './Coordinator/Coordinator_notice.jsx';
 
 import Examiner_dashboard from './Examiner/examiner_dashboard.jsx';
 import Examiner_evaluate from './Examiner/examiner_evaluate.jsx';
@@ -33,6 +39,8 @@ import Student_meetings from './Student/student_meetings.jsx';
 import Student_progress from './Student/student_progress.jsx';
 import Student_topic from './Student/student_topic.jsx';
 import Student_assignment from './Student/student_assignment.jsx';
+import Student_notice from './Student/student_notice.jsx';
+
 
 import Supervisor_assignments from './Supervisor/supervisor_assignments.jsx';
 import Supervisor_dashboard from './Supervisor/supervisor_dashboard.jsx';
@@ -43,6 +51,9 @@ import Supervisor_topics from './Supervisor/supervisor_topics.jsx';
 import Supervisor_ex_dashboard from './Supervisor/Supervisor_ex_dashboard.jsx';
 import Supervisor_ex_evaluate from './Supervisor/Supervisor_ex_evaluate.jsx';
 import Supervisor_ex_reprots from './Supervisor/Supervisor_ex_reports.jsx';
+import Supervisor_eval_edit from './Supervisor/supervisor_eval_edit.jsx';
+import Supervisor_eval_request from './Supervisor/supervisor_eval_request.jsx';
+import Supervisor_notice from './Supervisor/supervisor_notice.jsx';
 
 export default function DynamicPageShower({ user, currentPage }) {
     if(!user){
@@ -80,7 +91,10 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return <Boards user={user}/>;
                 case 'board_assign_group':
                     return <GroupsAssign user={user}/>;
-                
+                case 'admin_eval_request':
+                    return <Admin_eval_request user={user}/>;
+                case 'admin_notice':
+                    return <Admin_notice user={user}/>;
 
                 default:
                     return (
@@ -98,10 +112,18 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return <Coordinator_groups user={user}/>; 
                 case 'coordinator_reports':
                     return <Coordinator_reports user={user}/>;
-                    case 'coordinator_ai':
+                case 'coordinator_ai':
                     return <Coordinator_ai user={user}/>; 
                 case 'coordinator_examiners':
                     return <Coordinator_examiners user={user}/>; 
+                case 'coordinator_ex_dashboard':
+                    return <Coordinator_ex_dashboard user={user}/>; 
+                case 'coordinator_ex_evaluate':
+                    return <Coordinator_ex_evaluate user={user}/>; 
+                case 'coordinator_ex_reports':
+                    return <Coordinator_ex_reports user={user}/>;
+                case 'coordinator_notice':
+                    return <Coordinator_notice user={user}/>; 
                     
                 default:
                     return (
@@ -135,6 +157,12 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return <Supervisor_ex_evaluate user={user}/>;
                 case 'supervisor_ex_reports':
                     return <Supervisor_ex_reprots user={user}/>;    
+                case 'supervisor_eval_request':
+                    return <Supervisor_eval_request user={user}/>;
+                case 'supervisor_eval_edit':
+                    return <Supervisor_eval_edit user={user}/>;
+                case 'supervisor_notice':
+                    return <Supervisor_notice user={user}/>;
                 default:
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>
@@ -160,7 +188,9 @@ export default function DynamicPageShower({ user, currentPage }) {
                 case 'student_attendance':
                     return <Student_attendance user={user}/>; 
                 case 'student_assignment':
-                    return <Student_assignment user={user}/>; 
+                    return <Student_assignment user={user}/>;
+                case 'student_notice':
+                    return <Student_notice user={user}/>; 
                 default:
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>

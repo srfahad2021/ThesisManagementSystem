@@ -17,6 +17,8 @@ export const roles = {
         { id: 'semesters', icon: icons.calIcon, label: 'Semesters' },
         { id: 'boards', icon: icons.boardIcon, label: 'Boards' },
         { id: 'board_assign_group', icon: icons.groupIcon, label: 'Group Assign(Board)' },
+        { id: 'admin_eval_request', icon: icons.evalIcon, label: 'Re-Evaluation Request' },
+        { id: 'admin_notice', icon: icons.evalIcon, label: 'Notices' },
       ]},
       { section: 'Academic', items: [
         { id: 'topics', icon: icons.topicIcon, label: 'Topic Review' },
@@ -45,6 +47,8 @@ export const roles = {
         { id: 'student_progress', icon: icons.progressIcon, label: 'Weekly Reports', badge: '2' },
         { id: 'student_documents', icon: icons.docIcon, label: 'Documents' },
         { id: 'student_meetings', icon: icons.meetingIcon, label: 'Meetings' },
+        { id: 'student_notice', icon: icons.evalIcon, label: 'Notices' },
+
       ]},
       { section: 'Evaluation', items: [
         { id: 'student_evaluation', icon: icons.evalIcon, label: 'Evaluation' },
@@ -68,11 +72,15 @@ export const roles = {
         { id: 'supervisor_docs', icon: icons.docIcon, label: 'Document Review' },
         { id: 'supervisor_meetings', icon: icons.meetingIcon, label: 'Meetings' },
         { id: 'supervisor_assignments', icon: icons.assignIcon, label: 'Assignments' },
+        { id: 'supervisor_notice', icon: icons.evalIcon, label: 'Notices' },
+
       ]},
       { section: 'Examination', items: [
         { id: 'supervisor_ex_dashboard', icon: icons.homeIcon, label: 'Dashboard' },
         { id: 'supervisor_ex_evaluate', icon: icons.evalIcon, label: 'Evaluate Thesis' },
         { id: 'supervisor_ex_reports', icon: icons.reportIcon, label: 'Evaluation Reports' },
+        { id: 'supervisor_eval_request', icon: icons.evalIcon, label: 'Re-Evaluation Request' },
+        { id: 'supervisor_eval_edit', icon: icons.evalIcon, label: 'Edit Evaluation' },
       ]},
     ]
   },
@@ -90,6 +98,13 @@ export const roles = {
         { id: 'coordinator_reports', icon: icons.progressIcon, label: 'Review Reports' },
         { id: 'coordinator_ai', icon: icons.aiIcon, label: 'AI Summaries' },
         { id: 'coordinator_examiners', icon: icons.userIcon, label: 'Assign Examiners' },
+        { id: 'coordinator_notice', icon: icons.evalIcon, label: 'Notices' },
+
+      ]},
+      { section: 'Examination', items: [
+        { id: 'coordinator_ex_dashboard', icon: icons.homeIcon, label: 'Dashboard' },
+        { id: 'coordinator_ex_evaluate', icon: icons.evalIcon, label: 'Evaluate Thesis' },
+        { id: 'coordinator_ex_reports', icon: icons.reportIcon, label: 'Evaluation Reports' },
       ]},
     ]
   },

@@ -20,7 +20,7 @@ const modalCardStyle = {
   borderRadius: '8px',
   padding: '24px',
   width: '100%',
-  maxWidth: '440px',
+  maxWidth: '480px',
   boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
 };
 
@@ -45,7 +45,6 @@ export default function Boards() {
   const itemsPerPage = 8;
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [editingBoard, setEditingBoard] = useState(null);
 
   useEffect(() => {
@@ -130,14 +129,9 @@ export default function Boards() {
     <div className="boards-container" style={{ padding: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h2>Board Management</h2>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn-secondary" onClick={() => setIsBulkOpen(true)}>
-            Bulk Create
-          </button>
-          <button className="btn-primary" onClick={() => setIsCreateOpen(true)}>
-            + Create Board
-          </button>
-        </div>
+        <button className="btn-primary" onClick={() => setIsCreateOpen(true)}>
+          + Create Board
+        </button>
       </div>
 
       <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
@@ -213,8 +207,7 @@ export default function Boards() {
                       </button>
                       <button
                         className="btn-secondary"
-                        style={{ padding: '4px 8px', borderColor: '#E85555'
-                         }}
+                        style={{ padding: '4px 8px', borderColor: '#E85555' }}
                         onClick={() => handleDeleteBoard(b)}
                       >
                         Delete
@@ -256,8 +249,9 @@ export default function Boards() {
         </div>
       )}
 
+      {/* Unified Create Modal */}
       {isCreateOpen && (
-        <BoardFormModal
+        <CreateBoardModal
           semesters={semesters}
           onClose={() => setIsCreateOpen(false)}
           onSuccess={() => {
@@ -267,8 +261,9 @@ export default function Boards() {
         />
       )}
 
+      {/* Edit Modal */}
       {editingBoard && (
-        <BoardFormModal
+        <BoardEditModal
           board={editingBoard}
           semesters={semesters}
           onClose={() => setEditingBoard(null)}
@@ -278,32 +273,205 @@ export default function Boards() {
           }}
         />
       )}
-
-      {isBulkOpen && (
-        <BoardBulkCreatePopup
-          semesters={semesters}
-          onClose={() => setIsBulkOpen(false)}
-          onSuccess={() => {
-            setIsBulkOpen(false);
-            fetchData();
-          }}
-        />
-      )}
     </div>
   );
 }
 
-function BoardFormModal({ board, semesters, onClose, onSuccess }) {
+function CreateBoardModal({ semesters, onClose, onSuccess }) {
+  const [tab, setTab] = useState('single'); // 'single' or 'bulk'
+  
+  // Single Creation State
+  const [formData, setFormData] = useState({
+    name: '',
+    semesterId: ''
+  });
+
+  // Bulk Upload State
+  const [excelFile, setExcelFile] = useState(null);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSingleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      setSubmitting(true);
+      const payload = {
+        name: formData.name,
+        semesterId: formData.semesterId ? parseInt(formData.semesterId, 10) : null
+      };
+
+      // Updated to point directly to /api/board/singleboardcreation
+      const response = await axios.post('/api/board/singleboardcreation', payload, getAuthConfig());
+      
+      onSuccess(response.data);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Failed to create board.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleBulkSubmit = async (e) => {
+    e.preventDefault();
+    if (!excelFile) {
+      setError('Please select an Excel file first.');
+      return;
+    }
+
+    setError('');
+    try {
+      setSubmitting(true);
+      const fileData = new FormData();
+      fileData.append('file', excelFile);
+
+      const token = sessionStorage.getItem('token');
+      await axios.post('/api/board/bulk-excel', fileData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      onSuccess();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Failed to bulk upload boards from Excel.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" style={modalOverlayStyle}>
+      <div className="modal-card" style={modalCardStyle}>
+        <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Create Board</h3>
+
+        {/* Tab Toggle */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #ddd', marginBottom: '20px' }}>
+          <button
+            type="button"
+            onClick={() => { setTab('single'); setError(''); }}
+            style={{
+              flex: 1,
+              padding: '8px',
+              border: 'none',
+              background: 'none',
+              borderBottom: tab === 'single' ? '2px solid #0056b3' : 'none',
+              fontWeight: tab === 'single' ? '600' : 'normal',
+              cursor: 'pointer'
+            }}
+          >
+            Single Creation
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTab('bulk'); setError(''); }}
+            style={{
+              flex: 1,
+              padding: '8px',
+              border: 'none',
+              background: 'none',
+              borderBottom: tab === 'bulk' ? '2px solid #0056b3' : 'none',
+              fontWeight: tab === 'bulk' ? '600' : 'normal',
+              cursor: 'pointer'
+            }}
+          >
+            Bulk Excel Upload
+          </button>
+        </div>
+
+        {error && <div style={{ color: 'red', marginBottom: '12px', fontSize: '14px' }}>{error}</div>}
+
+        {tab === 'single' ? (
+          <form onSubmit={handleSingleSubmit}>
+            <div style={{ marginBottom: '16px' }}>
+              <label className="text-sm" style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>
+                Board Name *
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g. Board A"
+                style={{ width: '100%' }}
+                required
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label className="text-sm" style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>
+                Active Semester
+              </label>
+              <select
+                className="form-control"
+                value={formData.semesterId}
+                onChange={(e) => setFormData({ ...formData, semesterId: e.target.value })}
+                style={{ width: '100%' }}
+              >
+                <option value="">-- Select Active Semester --</option>
+                {semesters.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.displayName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
+              <button type="button" className="btn-secondary" onClick={onClose} disabled={submitting}>
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting ? 'Creating...' : 'Create Board'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleBulkSubmit}>
+            <div style={{ marginBottom: '16px' }}>
+              <label className="text-sm" style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>
+                Upload Excel File (.xlsx, .xls)
+              </label>
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                className="form-control"
+                onChange={(e) => setExcelFile(e.target.files[0])}
+                style={{ width: '100%' }}
+                required
+              />
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '6px' }}>
+                Excel structure: Column 1 = Board Name, Column 2 = Semester ID or Semester Name.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
+              <button type="button" className="btn-secondary" onClick={onClose} disabled={submitting}>
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting ? 'Uploading...' : 'Upload & Process'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BoardEditModal({ board, semesters, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     name: board?.name || '',
     semesterId: board?.semesterId ? board.semesterId.toString() : ''
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -316,17 +484,11 @@ function BoardFormModal({ board, semesters, onClose, onSuccess }) {
         semesterId: formData.semesterId ? parseInt(formData.semesterId, 10) : null
       };
 
-      const config = getAuthConfig();
-
-      if (board) {
-        await axios.put(`/api/board/${board.id}`, payload, config);
-      } else {
-        await axios.post('/api/board', payload, config);
-      }
+      await axios.put(`/api/board/${board.id}`, payload, getAuthConfig());
       onSuccess();
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Failed to save board.');
+      setError(err.response?.data?.message || 'Failed to update board.');
     } finally {
       setSubmitting(false);
     }
@@ -335,9 +497,7 @@ function BoardFormModal({ board, semesters, onClose, onSuccess }) {
   return (
     <div className="modal-overlay" style={modalOverlayStyle}>
       <div className="modal-card" style={modalCardStyle}>
-        <h3 style={{ marginTop: 0, marginBottom: '16px' }}>
-          {board ? 'Edit Board' : 'Create New Board'}
-        </h3>
+        <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Edit Board</h3>
 
         {error && <div style={{ color: 'red', marginBottom: '12px', fontSize: '14px' }}>{error}</div>}
 
@@ -348,11 +508,9 @@ function BoardFormModal({ board, semesters, onClose, onSuccess }) {
             </label>
             <input
               type="text"
-              name="name"
               className="form-control"
               value={formData.name}
-              onChange={handleChange}
-              placeholder="e.g. Board A"
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               style={{ width: '100%' }}
               required
             />
@@ -363,10 +521,9 @@ function BoardFormModal({ board, semesters, onClose, onSuccess }) {
               Active Semester
             </label>
             <select
-              name="semesterId"
               className="form-control"
               value={formData.semesterId}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, semesterId: e.target.value })}
               style={{ width: '100%' }}
             >
               <option value="">-- Select Active Semester --</option>
@@ -383,83 +540,7 @@ function BoardFormModal({ board, semesters, onClose, onSuccess }) {
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={submitting}>
-              {submitting ? 'Saving...' : board ? 'Save Changes' : 'Create Board'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function BoardBulkCreatePopup({ semesters, onClose, onSuccess }) {
-  const defaultSemesterId = semesters.length > 0 ? semesters[0].id : 1;
-  const initialJson = JSON.stringify(
-    [
-      { name: 'Board A', semesterId: defaultSemesterId },
-      { name: 'Board B', semesterId: defaultSemesterId }
-    ],
-    null,
-    2
-  );
-
-  const [jsonText, setJsonText] = useState(initialJson);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    try {
-      const parsedData = JSON.parse(jsonText);
-      if (!Array.isArray(parsedData)) {
-        setError('JSON payload must be an array of board objects.');
-        return;
-      }
-
-      setSubmitting(true);
-      await axios.post('/api/board/bulk', parsedData, getAuthConfig());
-      onSuccess();
-    } catch (err) {
-      console.error(err);
-      if (err instanceof SyntaxError) {
-        setError('Invalid JSON format. Please check your syntax.');
-      } else {
-        setError(err.response?.data?.message || 'Failed to upload bulk boards.');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="modal-overlay" style={modalOverlayStyle}>
-      <div className="modal-card" style={modalCardStyle}>
-        <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Bulk Create Boards</h3>
-
-        {error && <div style={{ color: 'red', marginBottom: '12px', fontSize: '14px' }}>{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label className="text-sm" style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>
-              Paste JSON Array
-            </label>
-            <textarea
-              className="form-control"
-              value={jsonText}
-              onChange={(e) => setJsonText(e.target.value)}
-              rows="8"
-              style={{ width: '100%', fontFamily: 'monospace', fontSize: '13px' }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
-            <button type="button" className="btn-secondary" onClick={onClose} disabled={submitting}>
-              Cancel
-            </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
-              {submitting ? 'Uploading...' : 'Upload Boards'}
+              {submitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
