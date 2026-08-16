@@ -9,6 +9,7 @@
       "PracticumProjects.Server/1.0.0": {
         "dependencies": {
           "BCrypt.Net-Next": "4.2.0",
+          "EPPlus": "8.6.3",
           "ExcelDataReader.DataSet": "3.9.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.10",
           "Microsoft.AspNetCore.OpenApi": "10.0.10",
@@ -27,6 +28,26 @@
           "lib/net10.0/BCrypt-Net-Next.dll": {
             "assemblyVersion": "4.2.0.0",
             "fileVersion": "4.2.0.0"
+          }
+        }
+      },
+      "EPPlus/8.6.3": {
+        "dependencies": {
+          "EPPlus.Interfaces": "8.6.2",
+          "Microsoft.IO.RecyclableMemoryStream": "3.0.1"
+        },
+        "runtime": {
+          "lib/net10.0/EPPlus.dll": {
+            "assemblyVersion": "8.6.3.0",
+            "fileVersion": "8.6.3.0"
+          }
+        }
+      },
+      "EPPlus.Interfaces/8.6.2": {
+        "runtime": {
+          "lib/net10.0/EPPlus.Interfaces.dll": {
+            "assemblyVersion": "8.6.2.0",
+            "fileVersion": "8.6.2.0"
           }
         }
       },
@@ -500,6 +521,14 @@
           }
         }
       },
+      "Microsoft.IO.RecyclableMemoryStream/3.0.1": {
+        "runtime": {
+          "lib/net6.0/Microsoft.IO.RecyclableMemoryStream.dll": {
+            "assemblyVersion": "3.0.1.0",
+            "fileVersion": "3.0.1.0"
+          }
+        }
+      },
       "Microsoft.OpenApi/2.0.0": {
         "runtime": {
           "lib/net8.0/Microsoft.OpenApi.dll": {
@@ -633,6 +662,20 @@
       "sha512": "sha512-gwLD2KfCuwQesP17aVh4h6lpiMPEVt5Lbpndo0ej903hNUUTtyxt3ARdDjmuydBRTAUICc7OVKVbaOvc6SQYXA==",
       "path": "bcrypt.net-next/4.2.0",
       "hashPath": "bcrypt.net-next.4.2.0.nupkg.sha512"
+    },
+    "EPPlus/8.6.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/IcP3A26oHjDDR3ud2HR6klrmX5AjzywF2lmaRQPtNcYz3n6BxhuMfhfoeoKVMSgF5sFBRGMxZ5yNhJFMy23HA==",
+      "path": "epplus/8.6.3",
+      "hashPath": "epplus.8.6.3.nupkg.sha512"
+    },
+    "EPPlus.Interfaces/8.6.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Xl1ncbV84UCz7QxcHuWjGa6PKXnOTwbC+y2ZdDqe5Zt5MbozWQINOwchcKW+agqx9Rybl2SQ3GdN1fbPIbjVOA==",
+      "path": "epplus.interfaces/8.6.2",
+      "hashPath": "epplus.interfaces.8.6.2.nupkg.sha512"
     },
     "ExcelDataReader/3.9.0": {
       "type": "package",
@@ -808,6 +851,13 @@
       "sha512": "sha512-GtPC1S02uH1gOO4fQ+zRysIicKmEXaYFP8PIkdJYXqMyruYhopre4ozVHp0XiDSA0+GJvOZH9prxCPvgBMg4Ww==",
       "path": "microsoft.identitymodel.tokens/8.19.2",
       "hashPath": "microsoft.identitymodel.tokens.8.19.2.nupkg.sha512"
+    },
+    "Microsoft.IO.RecyclableMemoryStream/3.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-s/s20YTVY9r9TPfTrN5g8zPF1YhwxyqO6PxUkrYTGI2B+OGPe9AdajWZrLhFqXIvqIW23fnUE4+ztrUWNU1+9g==",
+      "path": "microsoft.io.recyclablememorystream/3.0.1",
+      "hashPath": "microsoft.io.recyclablememorystream.3.0.1.nupkg.sha512"
     },
     "Microsoft.OpenApi/2.0.0": {
       "type": "package",

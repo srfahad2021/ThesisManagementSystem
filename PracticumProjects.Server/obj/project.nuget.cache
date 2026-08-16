@@ -1,10 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "xM2w2RTi5uo=",
+  "dgSpecHash": "dxBEpqLfzTA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
+  "projectFilePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\srfah\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
+    "C:\\Users\\srfah\\.nuget\\packages\\epplus\\8.6.3\\epplus.8.6.3.nupkg.sha512",
+    "C:\\Users\\srfah\\.nuget\\packages\\epplus.interfaces\\8.6.2\\epplus.interfaces.8.6.2.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\exceldatareader\\3.9.0\\exceldatareader.3.9.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\exceldatareader.dataset\\3.9.0\\exceldatareader.dataset.3.9.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
@@ -33,27 +35,30 @@
     "C:\\Users\\srfah\\.nuget\\packages\\microsoft.identitymodel.protocols\\8.19.2\\microsoft.identitymodel.protocols.8.19.2.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\microsoft.identitymodel.protocols.openidconnect\\8.19.2\\microsoft.identitymodel.protocols.openidconnect.8.19.2.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\microsoft.identitymodel.tokens\\8.19.2\\microsoft.identitymodel.tokens.8.19.2.nupkg.sha512",
+    "C:\\Users\\srfah\\.nuget\\packages\\microsoft.io.recyclablememorystream\\3.0.1\\microsoft.io.recyclablememorystream.3.0.1.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\mysqlconnector\\2.4.0\\mysqlconnector.2.4.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\pomelo.entityframeworkcore.mysql\\9.0.0\\pomelo.entityframeworkcore.mysql.9.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
+    "C:\\Users\\srfah\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.composition\\7.0.0\\system.composition.7.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.composition.attributedmodel\\7.0.0\\system.composition.attributedmodel.7.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.composition.convention\\7.0.0\\system.composition.convention.7.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.composition.hosting\\7.0.0\\system.composition.hosting.7.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.composition.runtime\\7.0.0\\system.composition.runtime.7.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.composition.typedparts\\7.0.0\\system.composition.typedparts.7.0.0.nupkg.sha512",
-    "C:\\Users\\srfah\\.nuget\\packages\\system.identitymodel.tokens.jwt\\8.19.2\\system.identitymodel.tokens.jwt.8.19.2.nupkg.sha512"
+    "C:\\Users\\srfah\\.nuget\\packages\\system.identitymodel.tokens.jwt\\8.19.2\\system.identitymodel.tokens.jwt.8.19.2.nupkg.sha512",
+    "C:\\Users\\srfah\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.10\\system.security.cryptography.pkcs.10.0.10.nupkg.sha512"
   ],
   "logs": [
     {
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
-      "projectPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
+      "projectPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
+      "filePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
       "libraryId": "Microsoft.OpenApi",
       "targetGraphs": [
         "net10.0"

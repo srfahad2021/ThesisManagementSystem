@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PracticumProjects.Server.Data;
 
@@ -11,9 +12,11 @@ using PracticumProjects.Server.Data;
 namespace PracticumProjects.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260816080820_AddEvaluationEditRequestTable")]
+    partial class AddEvaluationEditRequestTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -498,75 +501,6 @@ namespace PracticumProjects.Server.Migrations
                     b.HasIndex("SubmittedBy");
 
                     b.ToTable("meeting_summaries");
-                });
-
-            modelBuilder.Entity("PracticumProjects.Server.Models.Notice", b =>
-                {
-                    b.Property<int>("NoticeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("notice_id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("NoticeId"));
-
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("int")
-                        .HasColumnName("author_id");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("content");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("NoticeType")
-                        .HasColumnType("int")
-                        .HasColumnName("notice_type");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)")
-                        .HasColumnName("title");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("NoticeId");
-
-                    b.HasIndex("AuthorId");
-
-                    b.ToTable("notices");
-                });
-
-            modelBuilder.Entity("PracticumProjects.Server.Models.NoticeTargetGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int")
-                        .HasColumnName("group_id");
-
-                    b.Property<int>("NoticeId")
-                        .HasColumnType("int")
-                        .HasColumnName("notice_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("NoticeId");
-
-                    b.ToTable("notice_target_groups");
                 });
 
             modelBuilder.Entity("PracticumProjects.Server.Models.StudentMark", b =>
@@ -1132,36 +1066,6 @@ namespace PracticumProjects.Server.Migrations
                     b.Navigation("Submitter");
                 });
 
-            modelBuilder.Entity("PracticumProjects.Server.Models.Notice", b =>
-                {
-                    b.HasOne("PracticumProjects.Server.Models.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-                });
-
-            modelBuilder.Entity("PracticumProjects.Server.Models.NoticeTargetGroup", b =>
-                {
-                    b.HasOne("PracticumProjects.Server.Models.ThesisGroup", "ThesisGroup")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PracticumProjects.Server.Models.Notice", "Notice")
-                        .WithMany("TargetGroups")
-                        .HasForeignKey("NoticeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Notice");
-
-                    b.Navigation("ThesisGroup");
-                });
-
             modelBuilder.Entity("PracticumProjects.Server.Models.StudentMark", b =>
                 {
                     b.HasOne("PracticumProjects.Server.Models.User", "Evaluator")
@@ -1221,11 +1125,6 @@ namespace PracticumProjects.Server.Migrations
             modelBuilder.Entity("PracticumProjects.Server.Models.Meeting", b =>
                 {
                     b.Navigation("Summary");
-                });
-
-            modelBuilder.Entity("PracticumProjects.Server.Models.Notice", b =>
-                {
-                    b.Navigation("TargetGroups");
                 });
 
             modelBuilder.Entity("PracticumProjects.Server.Models.ThesisGroup", b =>

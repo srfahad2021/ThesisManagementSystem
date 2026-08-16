@@ -11,7 +11,8 @@ namespace PracticumProjects.Server.Models
         AssignmentSubmission,
         WeeklyReport,
         Exam,
-        DocumentSubmission
+        DocumentSubmission,
+        NoticeBoard
     }
 
     [Table("submission_files")]

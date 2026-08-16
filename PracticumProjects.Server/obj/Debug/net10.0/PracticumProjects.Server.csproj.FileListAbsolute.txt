@@ -136,3 +136,6 @@ C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\spa.proxy.json
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\Microsoft.AspNetCore.SpaProxy.dll
 C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\obj\Debug\net10.0\spa.proxy.json
+C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\EPPlus.dll
+C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\EPPlus.Interfaces.dll
+C:\Users\srfah\source\repos\PracticumProjects\practicumprojects.server\bin\Debug\net10.0\Microsoft.IO.RecyclableMemoryStream.dll

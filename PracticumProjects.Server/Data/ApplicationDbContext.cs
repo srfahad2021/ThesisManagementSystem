@@ -26,10 +26,16 @@ public class ApplicationDbContext : DbContext
       public DbSet<BoardMember> BoardMembers { get; set; }
       public DbSet<BoardGroup> BoardGroups { get; set; }
       public DbSet<StudentMark> StudentMarks { get; set; }
+      public DbSet<EvaluationEditRequest> EvaluationEditRequests { get; set; }
 
       // --- Assignment DbSets ---
       public DbSet<Assignment> Assignments { get; set; }
       public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
+
+      // Notices
+
+      public DbSet<Notice> Notices { get; set; }
+    public DbSet<NoticeTargetGroup> NoticeTargetGroups { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -246,5 +252,29 @@ public class ApplicationDbContext : DbContext
                   .HasMaxLength(50)
                   .IsRequired();
         });
+
+
+      // Notice configuration
+        modelBuilder.Entity<Notice>(entity =>
+        {
+            entity.HasOne(n => n.Author)
+                  .WithMany()
+                  .HasForeignKey(n => n.AuthorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<NoticeTargetGroup>(entity =>
+        {
+            entity.HasOne(ntg => ntg.Notice)
+                  .WithMany(n => n.TargetGroups)
+                  .HasForeignKey(ntg => ntg.NoticeId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(ntg => ntg.ThesisGroup)
+                  .WithMany()
+                  .HasForeignKey(ntg => ntg.GroupId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+        
     }
 }

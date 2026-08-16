@@ -44,7 +44,6 @@ namespace PracticumProjects.Server.Controllers
         {
             int studentId = GetCurrentUserId();
 
-            // Find all group member records where the current user is Student1 or Student2
             var myGroups = await _context.GroupMembers
                 .Include(gm => gm.ThesisGroup)
                     .ThenInclude(tg => tg.Semester)
@@ -70,7 +69,6 @@ namespace PracticumProjects.Server.Controllers
         {
             int studentId = GetCurrentUserId();
 
-            // Verify student actually belongs to this group
             bool isMember = await _context.GroupMembers
                 .AnyAsync(gm => gm.GroupId == groupId && (gm.StudentId1 == studentId || gm.StudentId2 == studentId));
 
@@ -88,7 +86,6 @@ namespace PracticumProjects.Server.Controllers
                 return NotFound("Thesis group not found.");
             }
 
-            // Fetch marks entries for this specific student and group
             var evaluations = await _context.StudentMarks
                 .Include(sm => sm.Evaluator)
                 .Where(sm => sm.GroupId == groupId && sm.StudentId == studentId)
@@ -280,36 +277,36 @@ namespace PracticumProjects.Server.Controllers
                 return BadRequest("Group members not found for this group.");
             }
 
-            List<int> targetStudentIds = dto.StudentIds;
-
-            if (targetStudentIds == null || !targetStudentIds.Any())
+            if (dto.StudentEvaluations == null || !dto.StudentEvaluations.Any())
             {
-                targetStudentIds = new List<int>();
-                if (groupMember.StudentId1.HasValue) targetStudentIds.Add(groupMember.StudentId1.Value);
-                if (groupMember.StudentId2.HasValue) targetStudentIds.Add(groupMember.StudentId2.Value);
+                return BadRequest("No student marks provided for evaluation.");
             }
 
-            if (!targetStudentIds.Any())
-            {
-                return BadRequest("No students associated with this group to evaluate.");
-            }
+            var validStudentIds = new List<int>();
+            if (groupMember.StudentId1.HasValue) validStudentIds.Add(groupMember.StudentId1.Value);
+            if (groupMember.StudentId2.HasValue) validStudentIds.Add(groupMember.StudentId2.Value);
 
             var marksList = new List<StudentMark>();
 
-            foreach (var studentId in targetStudentIds)
+            foreach (var eval in dto.StudentEvaluations)
             {
+                if (!validStudentIds.Contains(eval.StudentId))
+                {
+                    return BadRequest($"Student ID {eval.StudentId} does not belong to this group.");
+                }
+
                 var mark = new StudentMark
                 {
-                    StudentId = studentId,
+                    StudentId = eval.StudentId,
                     GroupId = dto.GroupId,
                     EvaluatorId = evaluatorId,
-                    ResearchTopicAndObjectives = dto.ResearchTopicAndObjectives,
-                    LiteratureReview = dto.LiteratureReview,
-                    Methodology = dto.Methodology,
-                    DevelopmentAndImplementation = dto.DevelopmentAndImplementation,
-                    TestingAndResults = dto.TestingAndResults,
-                    DocumentationQuality = dto.DocumentationQuality,
-                    Presentation = dto.Presentation,
+                    ResearchTopicAndObjectives = eval.ResearchTopicAndObjectives,
+                    LiteratureReview = eval.LiteratureReview,
+                    Methodology = eval.Methodology,
+                    DevelopmentAndImplementation = eval.DevelopmentAndImplementation,
+                    TestingAndResults = eval.TestingAndResults,
+                    DocumentationQuality = eval.DocumentationQuality,
+                    Presentation = eval.Presentation,
                     CreatedAt = DateTime.UtcNow
                 };
                 marksList.Add(mark);
@@ -318,17 +315,15 @@ namespace PracticumProjects.Server.Controllers
             _context.StudentMarks.AddRange(marksList);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Evaluation submitted successfully." });
+            return Ok(new { message = "Evaluations submitted successfully." });
         }
 
         #endregion
     }
 
-    public class EvaluationSubmitDto
+    public class SingleStudentEvaluationDto
     {
-        public int GroupId { get; set; }
-        public List<int> StudentIds { get; set; } = new();
-
+        public int StudentId { get; set; }
         public decimal ResearchTopicAndObjectives { get; set; }
         public decimal LiteratureReview { get; set; }
         public decimal Methodology { get; set; }
@@ -337,5 +332,11 @@ namespace PracticumProjects.Server.Controllers
         public decimal DocumentationQuality { get; set; }
         public decimal Presentation { get; set; }
         public string? Remarks { get; set; }
+    }
+
+    public class EvaluationSubmitDto
+    {
+        public int GroupId { get; set; }
+        public List<SingleStudentEvaluationDto> StudentEvaluations { get; set; } = new();
     }
 }

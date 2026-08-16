@@ -3,6 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PracticumProjects.Server.Data; // Adjust to your DbContext namespace
 using PracticumProjects.Server.Models;
+using PracticumProjects.Models;
+using ExcelDataReader;
+using System.Data;
+using Microsoft.AspNetCore.Http;
+using OfficeOpenXml;
 
 namespace PracticumProjects.Server.Controllers;
 
@@ -39,6 +44,36 @@ public class BoardController : ControllerBase
         return Ok(boards);
     }
 
+    [HttpPost("singleboardcreation")]
+public async Task<IActionResult> SingleBoardCreation([FromBody] CreateBoardDto dto)
+{
+    if (dto == null || string.IsNullOrWhiteSpace(dto.Name))
+    {
+        return BadRequest(new { message = "Board name is required." });
+    }
+
+    try
+    {
+        // Add logic to save the new board entity to your database context
+        var newBoard = new Board
+        {
+            Name = dto.Name,
+            SemesterId = dto.SemesterId,
+            IsActive = true
+        };
+
+        _context.Boards.Add(newBoard);
+        await _context.SaveChangesAsync();
+
+        return Ok(newBoard);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "An error occurred while creating the board.", error = ex.Message });
+    }
+}
+
+    
     // GET: api/board/5
     [HttpGet("{id}")]
     public async Task<IActionResult> GetBoard(int id)
@@ -108,27 +143,6 @@ public class BoardController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(new { message = "Board status updated." });
-    }
-
-    // POST: api/board/bulk
-    [HttpPost("bulk")]
-    public async Task<IActionResult> BulkCreateBoards([FromBody] List<CreateBoardDto> dtos)
-    {
-        if (dtos == null || !dtos.Any())
-            return BadRequest(new { message = "No boards provided." });
-
-        var boards = dtos.Select(d => new Board
-        {
-            Name = d.Name,
-            SemesterId = d.SemesterId,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        }).ToList();
-
-        _context.Boards.AddRange(boards);
-        await _context.SaveChangesAsync();
-
-        return Ok(new { message = $"{boards.Count} boards created successfully." });
     }
 
     // GET: api/board/active
@@ -256,47 +270,126 @@ public class BoardController : ControllerBase
         return Ok(activeBoards);
     }
 
-    // GET: api/board/{boardId}/groups
-    // Fetch assigned groups for a specific board popup modal
-    [HttpGet("{boardId}/groups")]
-    public async Task<IActionResult> GetBoardGroups(int boardId)
+    // ----------------------------------------------------
+    // POST: /api/boards/bulk-excel (ADMIN / TEACHER)
+    // ----------------------------------------------------
+    [HttpPost("bulk-excel")]
+    public async Task<IActionResult> BulkCreateBoardsFromExcel(IFormFile file)
     {
-        var boardGroups = await _context.BoardGroups
-            .Where(bg => bg.BoardId == boardId)
-            .Include(bg => bg.ThesisGroup)
-            .Select(bg => new
+        if (file == null || file.Length == 0)
+            return BadRequest(new { message = "No file uploaded." });
+
+        var allowedExtensions = new[] { ".csv", ".xls", ".xlsx", ".xlsm" };
+        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+        if (!allowedExtensions.Contains(fileExtension))
+            return BadRequest(new { message = "Unsupported file format. Please upload CSV or Excel files." });
+
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+        var newBoards = new List<Board>();
+        var errors = new List<string>();
+
+        try
+        {
+            // Retrieve semesters from database
+            var semesters = await _context.Semesters.ToListAsync();
+
+            using (var stream = file.OpenReadStream())
             {
-                boardGroupId = bg.BoardGroupId,
-                groupId = bg.GroupId,
-                groupName = bg.ThesisGroup.GroupName
-            })
-            .ToListAsync();
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                    {
+                        ConfigureDataTable = (_) => new ExcelDataTableConfiguration() { UseHeaderRow = true }
+                    });
 
-        return Ok(boardGroups);
-    }
+                    if (result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                        return BadRequest(new { message = "The uploaded file is empty." });
 
-    // GET: api/board/unassigned-groups
-    // Fetch groups that are NOT assigned to ANY board yet (1 group = max 1 board)
-    [HttpGet("unassigned-groups")]
-    public async Task<IActionResult> GetUnassignedGroups()
-    {
-        // Get all GroupIds already assigned across ALL boards
-        var assignedGroupIds = await _context.BoardGroups
-            .Select(bg => bg.GroupId)
-            .Distinct()
-            .ToListAsync();
+                    var table = result.Tables[0];
+                    int rowIndex = 1;
 
-        // Retrieve groups that are not in the assigned list
-        var unassignedGroups = await _context.ThesisGroups
-            .Where(tg => !assignedGroupIds.Contains(tg.GroupId))
-            .Select(tg => new
+                    foreach (DataRow row in table.Rows)
+                    {
+                        rowIndex++;
+
+                        string boardName = row.Table.Columns.Contains("Name") 
+                            ? row["Name"]?.ToString()?.Trim() ?? string.Empty 
+                            : (table.Columns.Count > 0 ? row[0]?.ToString()?.Trim() ?? string.Empty : string.Empty);
+
+                        if (string.IsNullOrWhiteSpace(boardName))
+                        {
+                            continue; // Skip empty rows
+                        }
+
+                        string semesterVal = row.Table.Columns.Contains("Semester") 
+                            ? row["Semester"]?.ToString()?.Trim() ?? string.Empty 
+                            : (table.Columns.Count > 1 ? row[1]?.ToString()?.Trim() ?? string.Empty : string.Empty);
+
+                        int? semesterId = null;
+
+                        if (!string.IsNullOrWhiteSpace(semesterVal))
+                        {
+                            Semester? sem = null;
+
+                            if (int.TryParse(semesterVal, out int parsedId))
+                            {
+                                sem = semesters.FirstOrDefault(s => s.SemesterId == parsedId);
+                            }
+                            else
+                            {
+                                sem = semesters.FirstOrDefault(s => 
+                                    $"{s.SemesterType} {s.Year}".Equals(semesterVal, StringComparison.OrdinalIgnoreCase) ||
+                                    s.SemesterType.ToString().Equals(semesterVal, StringComparison.OrdinalIgnoreCase));
+                            }
+
+                            // Check if semester exists
+                            if (sem == null)
+                            {
+                                errors.Add($"Row {rowIndex}: Board '{boardName}' was skipped because semester '{semesterVal}' does not exist.");
+                                continue;
+                            }
+
+                            // Check if semester is Active using SemesterStatus enum
+                            if (sem.Status != SemesterStatus.Active)
+                            {
+                                errors.Add($"Row {rowIndex}: Board '{boardName}' was skipped because semester '{semesterVal}' status is '{sem.Status}' (must be Active).");
+                                continue;
+                            }
+
+                            semesterId = sem.SemesterId;
+                        }
+
+                        newBoards.Add(new Board
+                        {
+                            Name = boardName,
+                            SemesterId = semesterId,
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
+
+            if (newBoards.Any())
             {
-                groupId = tg.GroupId,
-                groupName = tg.GroupName
-            })
-            .ToListAsync();
+                _context.Boards.AddRange(newBoards);
+                await _context.SaveChangesAsync();
+            }
 
-        return Ok(unassignedGroups);
+            return Ok(new
+            {
+                message = $"{newBoards.Count} board(s) imported successfully.",
+                createdCount = newBoards.Count,
+                skippedCount = errors.Count,
+                errors
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Error processing file: {ex.Message}" });
+        }
     }
 
     // POST: api/board/{boardId}/groups
@@ -341,6 +434,54 @@ public class BoardController : ControllerBase
             groupId = group.GroupId,
             groupName = group.GroupName
         });
+    }
+
+    // GET: api/board/{boardId}/groups
+    [HttpGet("{boardId}/groups")]
+    public async Task<IActionResult> GetBoardGroups(int boardId)
+    {
+        var board = await _context.Boards.FindAsync(boardId);
+        if (board == null)
+        {
+            return NotFound(new { message = "Board not found." });
+        }
+
+        var assignedGroups = await _context.BoardGroups
+            .Where(bg => bg.BoardId == boardId)
+            .Include(bg => bg.ThesisGroup)
+            .Select(bg => new
+            {
+                boardGroupId = bg.BoardGroupId,
+                groupId = bg.GroupId,
+                groupName = bg.ThesisGroup != null ? bg.ThesisGroup.GroupName : "N/A"
+            })
+            .ToListAsync();
+
+        return Ok(assignedGroups);
+    }
+
+    // GET: api/board/unassigned-groups
+    // Fetch groups that are NOT assigned to ANY board yet (1 group = max 1 board)
+    [HttpGet("unassigned-groups")]
+    public async Task<IActionResult> GetUnassignedGroups()
+    {
+        // Get all GroupIds already assigned across ALL boards
+        var assignedGroupIds = await _context.BoardGroups
+            .Select(bg => bg.GroupId)
+            .Distinct()
+            .ToListAsync();
+
+        // Retrieve groups that are not in the assigned list
+        var unassignedGroups = await _context.ThesisGroups
+            .Where(tg => !assignedGroupIds.Contains(tg.GroupId))
+            .Select(tg => new
+            {
+                groupId = tg.GroupId,
+                groupName = tg.GroupName
+            })
+            .ToListAsync();
+
+        return Ok(unassignedGroups);
     }
 
     // DELETE: api/board/groups/{boardGroupId}
