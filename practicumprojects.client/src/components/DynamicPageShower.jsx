@@ -12,6 +12,8 @@ import Documents from './Admin/documents.jsx';
 import Progress from './Admin/progress.jsx';
 import Reports from './Admin/reports.jsx';
 import Topics from './Admin/topics.jsx';
+import Boards from './Admin/Boards.jsx';
+import GroupsAssign from './Admin/group_assign_board.jsx'
 
 import Coordinator_ai from './Coordinator/coordinator_ai.jsx';
 import Coordinator_dashboard from './Coordinator/coordinator_dashboard.jsx';
@@ -30,6 +32,7 @@ import Student_evaluation from './Student/student_evaluation.jsx';
 import Student_meetings from './Student/student_meetings.jsx';
 import Student_progress from './Student/student_progress.jsx';
 import Student_topic from './Student/student_topic.jsx';
+import Student_assignment from './Student/student_assignment.jsx';
 
 import Supervisor_assignments from './Supervisor/supervisor_assignments.jsx';
 import Supervisor_dashboard from './Supervisor/supervisor_dashboard.jsx';
@@ -37,6 +40,9 @@ import Supervisor_docs from './Supervisor/supervisor_docs.jsx';
 import Supervisor_meetings from './Supervisor/supervisor_meetings.jsx';
 import Supervisor_reports from './Supervisor/supervisor_reports.jsx';
 import Supervisor_topics from './Supervisor/supervisor_topics.jsx';
+import Supervisor_ex_dashboard from './Supervisor/Supervisor_ex_dashboard.jsx';
+import Supervisor_ex_evaluate from './Supervisor/Supervisor_ex_evaluate.jsx';
+import Supervisor_ex_reprots from './Supervisor/Supervisor_ex_reports.jsx';
 
 export default function DynamicPageShower({ user, currentPage }) {
     if(!user){
@@ -70,6 +76,11 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return <Reports user={user}/>; 
                 case 'topics':
                     return <Topics user={user}/>; 
+                case 'boards':
+                    return <Boards user={user}/>;
+                case 'board_assign_group':
+                    return <GroupsAssign user={user}/>;
+                
 
                 default:
                     return (
@@ -117,7 +128,13 @@ export default function DynamicPageShower({ user, currentPage }) {
                 case 'supervisor_meetings':
                     return <Supervisor_meetings user={user}/>; 
                 case 'supervisor_assignments':
-                    return <Supervisor_assignments user={user}/>;         
+                    return <Supervisor_assignments user={user}/>;     
+                case 'supervisor_ex_dashboard':
+                    return <Supervisor_ex_dashboard user={user}/>;
+                case 'supervisor_ex_evaluate':
+                    return <Supervisor_ex_evaluate user={user}/>;
+                case 'supervisor_ex_reports':
+                    return <Supervisor_ex_reprots user={user}/>;    
                 default:
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>
@@ -141,7 +158,9 @@ export default function DynamicPageShower({ user, currentPage }) {
                 case 'student_evaluation':
                     return <Student_evaluation user={user}/>; 
                 case 'student_attendance':
-                    return <Supervisor_meetings user={user}/>; 
+                    return <Student_attendance user={user}/>; 
+                case 'student_assignment':
+                    return <Student_assignment user={user}/>; 
                 default:
                     return (
                         <div style={{ padding: '20px', background: '#fff', borderRadius: '8px' }}>

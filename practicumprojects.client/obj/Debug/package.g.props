@@ -9,6 +9,7 @@
     <PackageJsonScriptsBuild Condition="$(PackageJsonScriptsBuild) == ''">vite build</PackageJsonScriptsBuild>
     <PackageJsonScriptsLint Condition="$(PackageJsonScriptsLint) == ''">oxlint</PackageJsonScriptsLint>
     <PackageJsonScriptsPreview Condition="$(PackageJsonScriptsPreview) == ''">vite preview</PackageJsonScriptsPreview>
+    <PackageJsonDependenciesAxios Condition="$(PackageJsonDependenciesAxios) == ''">^1.19.0</PackageJsonDependenciesAxios>
     <PackageJsonDependenciesChartJs Condition="$(PackageJsonDependenciesChartJs) == ''">^4.5.1</PackageJsonDependenciesChartJs>
     <PackageJsonDependenciesDompurify Condition="$(PackageJsonDependenciesDompurify) == ''">^3.4.12</PackageJsonDependenciesDompurify>
     <PackageJsonDependenciesReact Condition="$(PackageJsonDependenciesReact) == ''">^19.2.7</PackageJsonDependenciesReact>

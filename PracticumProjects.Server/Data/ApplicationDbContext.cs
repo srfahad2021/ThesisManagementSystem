@@ -6,14 +6,30 @@ namespace PracticumProjects.Server.Data;
 
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+      public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-    public DbSet<User> Users => Set<User>();
-    public DbSet<ThesisGroup> ThesisGroups => Set<ThesisGroup>();
-    public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
-    public DbSet<Semester> Semesters => Set<Semester>();
-    public DbSet<TopicSubmission> TopicSubmissions => Set<TopicSubmission>();
-    public DbSet<SubmissionFile> SubmissionFiles => Set<SubmissionFile>();
+      public DbSet<User> Users => Set<User>();
+      public DbSet<ThesisGroup> ThesisGroups => Set<ThesisGroup>();
+      public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
+      public DbSet<Semester> Semesters => Set<Semester>();
+      public DbSet<TopicSubmission> TopicSubmissions => Set<TopicSubmission>();
+      public DbSet<SubmissionFile> SubmissionFiles => Set<SubmissionFile>();
+      public DbSet<WeeklyReport> WeeklyReports => Set<WeeklyReport>();
+
+      // New Meeting & Availability DbSets
+      public DbSet<AvailableTime> AvailableTimes => Set<AvailableTime>();
+      public DbSet<Meeting> Meetings => Set<Meeting>();
+      public DbSet<MeetingSummary> MeetingSummaries => Set<MeetingSummary>();
+
+      // Exam DbSets
+      public DbSet<Board> Boards { get; set; }
+      public DbSet<BoardMember> BoardMembers { get; set; }
+      public DbSet<BoardGroup> BoardGroups { get; set; }
+      public DbSet<StudentMark> StudentMarks { get; set; }
+
+      // --- Assignment DbSets ---
+      public DbSet<Assignment> Assignments { get; set; }
+      public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -113,8 +129,122 @@ public class ApplicationDbContext : DbContext
                   .HasConversion<string>()
                   .HasMaxLength(30);
 
-            // Composite index for fast lookups by module and record ID
             entity.HasIndex(f => new { f.ModuleType, f.EntityId });
+        });
+
+        // --- WeeklyReport Configuration ---
+        modelBuilder.Entity<WeeklyReport>(entity =>
+        {
+            entity.HasKey(r => r.ReportId);
+
+            entity.Property(r => r.Status)
+                  .HasConversion<string>()
+                  .HasMaxLength(30);
+
+            entity.Property(r => r.SupervisorStatus)
+                  .HasConversion<string>()
+                  .HasMaxLength(30);
+
+            entity.Property(r => r.CoordinatorStatus)
+                  .HasConversion<string>()
+                  .HasMaxLength(30);
+
+            entity.HasIndex(r => new { r.GroupId, r.WeekNumber }).IsUnique();
+        });
+
+        // --- AvailableTime Configuration ---
+        modelBuilder.Entity<AvailableTime>(entity =>
+        {
+            entity.HasKey(a => a.AvailabilityId);
+
+            entity.Property(a => a.DayOfWeek)
+                  .HasConversion<string>()
+                  .HasMaxLength(20);
+
+            entity.HasOne(a => a.User)
+                  .WithMany()
+                  .HasForeignKey(a => a.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(a => new { a.UserId, a.DayOfWeek });
+        });
+
+        // --- Meeting Configuration ---
+        modelBuilder.Entity<Meeting>(entity =>
+        {
+            entity.HasKey(m => m.MeetingId);
+
+            entity.Property(m => m.Medium)
+                  .HasConversion<string>()
+                  .HasMaxLength(20);
+
+            entity.Property(m => m.Status)
+                  .HasConversion<string>()
+                  .HasMaxLength(20);
+
+            entity.HasOne(m => m.ThesisGroup)
+                  .WithMany()
+                  .HasForeignKey(m => m.GroupId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(m => m.Host)
+                  .WithMany()
+                  .HasForeignKey(m => m.HostId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(m => m.RequestedByUser)
+                  .WithMany()
+                  .HasForeignKey(m => m.RequestedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(m => m.AvailableTime)
+                  .WithMany()
+                  .HasForeignKey(m => m.AvailabilityId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasIndex(m => m.GroupId);
+            entity.HasIndex(m => new { m.HostId, m.MeetingDate });
+        });
+        
+        // --- MeetingSummary Configuration ---
+        modelBuilder.Entity<MeetingSummary>(entity =>
+        {
+            entity.HasKey(s => s.SummaryId);
+
+            entity.HasOne(s => s.Meeting)
+                  .WithOne(m => m.Summary)
+                  .HasForeignKey<MeetingSummary>(s => s.MeetingId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(s => s.Submitter)
+                  .WithMany()
+                  .HasForeignKey(s => s.SubmittedBy)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // --- Assignment Configuration ---
+        modelBuilder.Entity<Assignment>(entity =>
+        {
+            entity.HasKey(a => a.AssignmentId);
+
+            entity.Property(a => a.Title)
+                  .HasMaxLength(200)
+                  .IsRequired();
+
+            entity.HasMany(a => a.Submissions)
+                  .WithOne(s => s.Assignment)
+                  .HasForeignKey(s => s.AssignmentId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // --- AssignmentSubmission Configuration ---
+        modelBuilder.Entity<AssignmentSubmission>(entity =>
+        {
+            entity.HasKey(s => s.AssignmentSubmissionId);
+
+            entity.Property(s => s.SubmissionStatus)
+                  .HasMaxLength(50)
+                  .IsRequired();
         });
     }
 }

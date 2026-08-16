@@ -12,7 +12,7 @@
           "ExcelDataReader.DataSet": "3.9.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.10",
           "Microsoft.AspNetCore.OpenApi": "10.0.10",
-          "Microsoft.AspNetCore.SpaProxy": "10.0.10",
+          "Microsoft.AspNetCore.SpaProxy": "10.0.11",
           "Microsoft.EntityFrameworkCore": "9.0.0",
           "Microsoft.EntityFrameworkCore.Design": "9.0.0",
           "Microsoft.EntityFrameworkCore.Relational": "9.0.0",
@@ -79,11 +79,11 @@
           }
         }
       },
-      "Microsoft.AspNetCore.SpaProxy/10.0.10": {
+      "Microsoft.AspNetCore.SpaProxy/10.0.11": {
         "runtime": {
           "lib/net10.0/Microsoft.AspNetCore.SpaProxy.dll": {
-            "assemblyVersion": "10.0.10.0",
-            "fileVersion": "10.0.1026.32716"
+            "assemblyVersion": "10.0.11.0",
+            "fileVersion": "10.0.1126.37416"
           }
         }
       },
@@ -669,12 +669,12 @@
       "path": "microsoft.aspnetcore.openapi/10.0.10",
       "hashPath": "microsoft.aspnetcore.openapi.10.0.10.nupkg.sha512"
     },
-    "Microsoft.AspNetCore.SpaProxy/10.0.10": {
+    "Microsoft.AspNetCore.SpaProxy/10.0.11": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-DF37xk7zgPbUBcsQ27+df+Iqmy4wQRz0THf3nsDBI8kbYwvkmgv2lvmxGdMCwTS9N89UtSbXMCkl0rRgHHsnHw==",
-      "path": "microsoft.aspnetcore.spaproxy/10.0.10",
-      "hashPath": "microsoft.aspnetcore.spaproxy.10.0.10.nupkg.sha512"
+      "sha512": "sha512-bu1oRqZVuvBXTXFMciLm57Gledjv6Y8veHmXtayLOjkoHm/2hNd35dZOA9hko6VQhmbQuPIQQNerbpJHyibzVw==",
+      "path": "microsoft.aspnetcore.spaproxy/10.0.11",
+      "hashPath": "microsoft.aspnetcore.spaproxy.10.0.11.nupkg.sha512"
     },
     "Microsoft.Bcl.AsyncInterfaces/7.0.0": {
       "type": "package",

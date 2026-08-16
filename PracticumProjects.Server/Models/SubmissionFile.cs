@@ -8,8 +8,10 @@ namespace PracticumProjects.Server.Models
     {
         TopicSubmission,
         Assignment,
+        AssignmentSubmission,
         WeeklyReport,
-        Exam
+        Exam,
+        DocumentSubmission
     }
 
     [Table("submission_files")]
@@ -19,17 +21,10 @@ namespace PracticumProjects.Server.Models
         [Column("file_id")]
         public int FileId { get; set; }
 
-        /// <summary>
-        /// Identifies the parent module: TopicSubmission, Assignment, WeeklyReport, Exam, etc.
-        /// </summary>
-
         [Required]
         [Column("module_type")]
         public AttachmentModule ModuleType { get; set; }
 
-        /// <summary>
-        /// The primary key ID of the parent record (e.g., TopicId, AssignmentId, WeeklyReportId, ExamId).
-        /// </summary>
         [Required]
         [Column("entity_id")]
         public int EntityId { get; set; }
@@ -53,5 +48,19 @@ namespace PracticumProjects.Server.Models
 
         [Column("uploaded_at")]
         public DateTimeOffset UploadedAt { get; set; } = DateTimeOffset.UtcNow;
+
+        [MaxLength(50)]
+        [Column("status")]
+        public string Status { get; set; } = "Under Review";
+
+        [Column("review_comments")]
+        public string? ReviewComments { get; set; }
+
+        [Column("reviewed_at")]
+        public DateTimeOffset? ReviewedAt { get; set; }
+
+        [MaxLength(150)]
+        [Column("reviewer_name")]
+        public string? ReviewerName { get; set; }
     }
 }

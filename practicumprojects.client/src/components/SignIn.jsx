@@ -149,6 +149,7 @@ export default function SignInPage({ onSwitchToSignUp, onLoginSuccess }) {
                                     <option value="SUPERVISOR">Supervisor / Faculty</option>
                                     <option value="COORDINATOR">Thesis Coordinator</option>
                                     <option value="ADMIN">Admin</option>
+                                    <option value="Examiner">Examiner</option>
                                 </select>
                             </div>
 
@@ -165,21 +166,9 @@ export default function SignInPage({ onSwitchToSignUp, onLoginSuccess }) {
                             </div>
 
                             <div style={styles.fieldGroup}>
-                                <div style={styles.labelRow}>
-                                    <label style={styles.label}>Password</label>
-                                    <a
-                                        href="#forgot"
-                                        style={styles.forgotLink}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            alert('Redirect to Password Recovery');
-                                        }}
-                                    >
-                                        Forgot password?
-                                    </a>
-                                </div>
-
+                                <label style={styles.label}>Password</label>
                                 <div style={styles.passwordWrapper}>
+                                    
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}

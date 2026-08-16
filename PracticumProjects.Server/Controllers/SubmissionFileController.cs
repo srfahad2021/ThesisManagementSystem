@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PracticumProjects.Server.Data;
 using PracticumProjects.Server.Models;
+using System.Security.Claims;
 
 namespace PracticumProjects.Server.Controllers;
 
@@ -30,7 +31,6 @@ public class SubmissionFileController : ControllerBase
         [FromRoute(Name = "moduleType")] AttachmentModule? routeModuleType = null,
         [FromRoute(Name = "entityId")] int? routeEntityId = null)
     {
-        // Fallback to route parameters if query parameters are absent
         var finalModule = moduleType ?? routeModuleType;
         var finalEntityId = entityId ?? routeEntityId;
 
@@ -71,7 +71,6 @@ public class SubmissionFileController : ControllerBase
             Directory.CreateDirectory(uploadsFolder);
         }
 
-        // Sanitize file name to prevent path traversal
         var safeFileName = Path.GetFileName(file.FileName);
         var uniqueFileName = $"{Guid.NewGuid()}_{safeFileName}";
         var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -89,13 +88,44 @@ public class SubmissionFileController : ControllerBase
             FilePath = Path.Combine(folderRelativePath, uniqueFileName).Replace('\\', '/'),
             ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
             FileSize = file.Length,
-            UploadedAt = DateTimeOffset.UtcNow
+            UploadedAt = DateTimeOffset.UtcNow,
+            Status = "Under Review"
         };
 
         _context.SubmissionFiles.Add(submissionFile);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetFileById), new { id = submissionFile.FileId }, MapToDto(submissionFile));
+    }
+
+    // --- NEW REVIEW ENDPOINTS (Accepts both PUT and POST) ---
+    [HttpPut("review/{id:int}")]
+    [HttpPost("review/{id:int}")]
+    public async Task<IActionResult> ReviewFile(int id, [FromBody] ReviewSubmissionRequest request)
+    {
+        var fileRecord = await _context.SubmissionFiles.FindAsync(id);
+        if (fileRecord == null)
+        {
+            return NotFound(new { message = $"File with ID {id} not found." });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Status))
+        {
+            return BadRequest(new { message = "Status is required." });
+        }
+
+        var reviewerName = User.FindFirst(ClaimTypes.Name)?.Value 
+                        ?? User.FindFirst("name")?.Value 
+                        ?? "Supervisor";
+
+        fileRecord.Status = request.Status;
+        fileRecord.ReviewComments = request.ReviewComments;
+        fileRecord.ReviewedAt = DateTimeOffset.UtcNow;
+        fileRecord.ReviewerName = reviewerName;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(MapToDto(fileRecord));
     }
 
     // GET: api/SubmissionFile/5
@@ -124,6 +154,17 @@ public class SubmissionFileController : ControllerBase
         var basePath = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
         var absolutePath = Path.Combine(basePath, fileRecord.FilePath);
 
+        if (!System.IO.File.Exists(absolutePath))
+        {
+            var alternativePath = Path.Combine(Directory.GetCurrentDirectory(), fileRecord.FilePath);
+            
+            if (System.IO.File.Exists(alternativePath))
+            {
+                absolutePath = alternativePath; // Found it in the fallback location!
+            }
+        }
+
+        // 3. Final check if it exists anywhere
         if (!System.IO.File.Exists(absolutePath))
         {
             return NotFound(new { message = "Physical file not found on disk." });
@@ -156,7 +197,6 @@ public class SubmissionFileController : ControllerBase
             }
             catch (Exception)
             {
-                // Continue removing DB record even if physical file deletion fails
             }
         }
 
@@ -165,6 +205,8 @@ public class SubmissionFileController : ControllerBase
 
         return Ok(new { message = "File deleted successfully." });
     }
+
+    
 
     private static SubmissionFileDto MapToDto(SubmissionFile file)
     {
@@ -176,9 +218,19 @@ public class SubmissionFileController : ControllerBase
             FileName = file.FileName,
             ContentType = file.ContentType,
             FileSize = file.FileSize,
-            UploadedAt = file.UploadedAt
+            UploadedAt = file.UploadedAt,
+            Status = file.Status,
+            ReviewComments = file.ReviewComments,
+            ReviewedAt = file.ReviewedAt,
+            ReviewerName = file.ReviewerName
         };
     }
+}
+
+public class ReviewSubmissionRequest
+{
+    public string Status { get; set; } = string.Empty;
+    public string? ReviewComments { get; set; }
 }
 
 public class SubmissionFileDto
@@ -190,4 +242,8 @@ public class SubmissionFileDto
     public string? ContentType { get; set; }
     public long FileSize { get; set; }
     public DateTimeOffset UploadedAt { get; set; }
+    public string Status { get; set; } = "Under Review";
+    public string? ReviewComments { get; set; }
+    public DateTimeOffset? ReviewedAt { get; set; }
+    public string? ReviewerName { get; set; }
 }

@@ -15,6 +15,8 @@ export const roles = {
         { id: 'users', icon: icons.userIcon, label: 'User Accounts', badge: '3' },
         { id: 'groups', icon: icons.groupIcon, label: 'Thesis Groups' },
         { id: 'semesters', icon: icons.calIcon, label: 'Semesters' },
+        { id: 'boards', icon: icons.boardIcon, label: 'Boards' },
+        { id: 'board_assign_group', icon: icons.groupIcon, label: 'Group Assign(Board)' },
       ]},
       { section: 'Academic', items: [
         { id: 'topics', icon: icons.topicIcon, label: 'Topic Review' },
@@ -47,6 +49,7 @@ export const roles = {
       { section: 'Evaluation', items: [
         { id: 'student_evaluation', icon: icons.evalIcon, label: 'Evaluation' },
         { id: 'student_attendance', icon: icons.attendIcon, label: 'Attendance' },
+        { id: 'student_assignment', icon: icons.assignIcon, label: 'Assignment' },
       ]},
     ]
   },
@@ -65,6 +68,11 @@ export const roles = {
         { id: 'supervisor_docs', icon: icons.docIcon, label: 'Document Review' },
         { id: 'supervisor_meetings', icon: icons.meetingIcon, label: 'Meetings' },
         { id: 'supervisor_assignments', icon: icons.assignIcon, label: 'Assignments' },
+      ]},
+      { section: 'Examination', items: [
+        { id: 'supervisor_ex_dashboard', icon: icons.homeIcon, label: 'Dashboard' },
+        { id: 'supervisor_ex_evaluate', icon: icons.evalIcon, label: 'Evaluate Thesis' },
+        { id: 'supervisor_ex_reports', icon: icons.reportIcon, label: 'Evaluation Reports' },
       ]},
     ]
   },
@@ -98,24 +106,6 @@ export const roles = {
       ]},
     ]
   },
-  SUPERADMIN: {
-    label: 'Super Admin',
-    initials: 'SA',
-    name: 'System Admin',
-    org: 'Platform Administration',
-    nav: [
-      { section: 'Platform', items: [
-        { id: 'dashboard', icon: icons.homeIcon, label: 'Dashboard' },
-        { id: 'sa_universities', icon: icons.univIcon, label: 'Universities' },
-        { id: 'sa_ai', icon: icons.aiIcon, label: 'AI Settings' },
-        { id: 'sa_subscriptions', icon: icons.reportIcon, label: 'Subscriptions' },
-        { id: 'sa_analytics', icon: icons.chartIcon, label: 'System Analytics' },
-      ]},
-      { section: 'CMS', items: [
-        { id: 'sa_cms', icon: icons.cmsIcon, label: 'Homepage CMS' },
-      ]},
-    ]
-  }
 };
 
 export const getPageLabel = (roleKey, pageId) => {

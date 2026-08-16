@@ -46,6 +46,25 @@ namespace PracticumProjects.Server.Controllers
             return Ok(semesters);
         }
 
+        // GET: api/semester/active
+        // Used by frontend dropdowns (e.g., Board creation/editing)
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActiveSemesters()
+        {
+            var semesters = await _context.Semesters
+                .Where(s => s.Status == SemesterStatus.Active)
+                .OrderByDescending(s => s.Year)
+                .ThenByDescending(s => s.SemesterType)
+                .Select(s => new
+                {
+                    id = s.SemesterId,
+                    displayName = $"{s.SemesterType} {s.Year}"
+                })
+                .ToListAsync();
+
+            return Ok(semesters);
+        }
+
         // GET: api/semester/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSemester(int id)

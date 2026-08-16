@@ -64,6 +64,235 @@ namespace PracticumProjects.Server.Migrations
                     b.ToTable("semesters");
                 });
 
+            modelBuilder.Entity("PracticumProjects.Server.Models.Assignment", b =>
+                {
+                    b.Property<int>("AssignmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("assignment_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AssignmentId"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("Deadline")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deadline");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext")
+                        .HasColumnName("description");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("AssignmentId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("assignments");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.AssignmentSubmission", b =>
+                {
+                    b.Property<int>("AssignmentSubmissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("assignment_submission_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AssignmentSubmissionId"));
+
+                    b.Property<string>("AssignmentFeedback")
+                        .HasColumnType("longtext")
+                        .HasColumnName("assignment_feedback");
+
+                    b.Property<int>("AssignmentId")
+                        .HasColumnType("int")
+                        .HasColumnName("assignment_id");
+
+                    b.Property<decimal?>("Grade")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("grade");
+
+                    b.Property<DateTimeOffset?>("GradedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("graded_at");
+
+                    b.Property<string>("GraderName")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("grader_name");
+
+                    b.Property<string>("SubmissionStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("submission_status");
+
+                    b.Property<string>("SubmissionText")
+                        .HasColumnType("longtext")
+                        .HasColumnName("submission_text");
+
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("submitted_at");
+
+                    b.HasKey("AssignmentSubmissionId");
+
+                    b.HasIndex("AssignmentId");
+
+                    b.ToTable("assignment_submissions");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.AvailableTime", b =>
+                {
+                    b.Property<int>("AvailabilityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("availability_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AvailabilityId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DayOfWeek")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("day_of_week");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time(6)")
+                        .HasColumnName("end_time");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time(6)")
+                        .HasColumnName("start_time");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("AvailabilityId");
+
+                    b.HasIndex("UserId", "DayOfWeek");
+
+                    b.ToTable("available_time");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.Board", b =>
+                {
+                    b.Property<int>("BoardId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("board_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BoardId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int?>("SemesterId")
+                        .HasColumnType("int")
+                        .HasColumnName("semester_id");
+
+                    b.HasKey("BoardId");
+
+                    b.HasIndex("SemesterId");
+
+                    b.ToTable("boards");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.BoardGroup", b =>
+                {
+                    b.Property<int>("BoardGroupId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("board_group_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BoardGroupId"));
+
+                    b.Property<int>("BoardId")
+                        .HasColumnType("int")
+                        .HasColumnName("board_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
+
+                    b.HasKey("BoardGroupId");
+
+                    b.HasIndex("BoardId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("board_groups");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.BoardMember", b =>
+                {
+                    b.Property<int>("BoardMemberId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("board_member_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BoardMemberId"));
+
+                    b.Property<int>("BoardId")
+                        .HasColumnType("int")
+                        .HasColumnName("board_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("BoardMemberId");
+
+                    b.HasIndex("BoardId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("board_members");
+                });
+
             modelBuilder.Entity("PracticumProjects.Server.Models.GroupMember", b =>
                 {
                     b.Property<int>("GroupId")
@@ -91,6 +320,203 @@ namespace PracticumProjects.Server.Migrations
                     b.HasIndex("SupervisorId");
 
                     b.ToTable("group_members");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.Meeting", b =>
+                {
+                    b.Property<int>("MeetingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("meeting_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("MeetingId"));
+
+                    b.Property<string>("Agenda")
+                        .HasColumnType("longtext")
+                        .HasColumnName("agenda");
+
+                    b.Property<int?>("AvailabilityId")
+                        .HasColumnType("int")
+                        .HasColumnName("availability_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time(6)")
+                        .HasColumnName("end_time");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("HostId")
+                        .HasColumnType("int")
+                        .HasColumnName("host_id");
+
+                    b.Property<string>("LocationOrLink")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("location_or_link");
+
+                    b.Property<string>("Medium")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("medium");
+
+                    b.Property<DateTime>("MeetingDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("meeting_date");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("longtext")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<int>("RequestedByUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("requested_by_user_id");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time(6)")
+                        .HasColumnName("start_time");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("MeetingId");
+
+                    b.HasIndex("AvailabilityId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("RequestedByUserId");
+
+                    b.HasIndex("HostId", "MeetingDate");
+
+                    b.ToTable("meetings");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.MeetingSummary", b =>
+                {
+                    b.Property<int>("SummaryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("summary_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("SummaryId"));
+
+                    b.Property<string>("ActionItems")
+                        .HasColumnType("longtext")
+                        .HasColumnName("action_items");
+
+                    b.Property<int>("MeetingId")
+                        .HasColumnType("int")
+                        .HasColumnName("meeting_id");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<int>("SubmittedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<string>("SummaryText")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("summary_text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("SummaryId");
+
+                    b.HasIndex("MeetingId")
+                        .IsUnique();
+
+                    b.HasIndex("SubmittedBy");
+
+                    b.ToTable("meeting_summaries");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.StudentMark", b =>
+                {
+                    b.Property<int>("MarkId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("mark_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("MarkId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<decimal>("DevelopmentAndImplementation")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("development_and_implementation");
+
+                    b.Property<decimal>("DocumentationQuality")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("documentation_quality");
+
+                    b.Property<int?>("EvaluatorId")
+                        .HasColumnType("int")
+                        .HasColumnName("evaluator_id");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
+
+                    b.Property<decimal>("LiteratureReview")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("literature_review");
+
+                    b.Property<decimal>("Methodology")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("methodology");
+
+                    b.Property<decimal>("Presentation")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("presentation");
+
+                    b.Property<decimal>("ResearchTopicAndObjectives")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("research_topic_and_objectives");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int")
+                        .HasColumnName("student_id");
+
+                    b.Property<decimal>("TestingAndResults")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("testing_and_results");
+
+                    b.HasKey("MarkId");
+
+                    b.HasIndex("EvaluatorId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("student_marks");
                 });
 
             modelBuilder.Entity("PracticumProjects.Server.Models.SubmissionFile", b =>
@@ -132,6 +558,25 @@ namespace PracticumProjects.Server.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)")
                         .HasColumnName("module_type");
+
+                    b.Property<string>("ReviewComments")
+                        .HasColumnType("longtext")
+                        .HasColumnName("review_comments");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("reviewed_at");
+
+                    b.Property<string>("ReviewerName")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("reviewer_name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset>("UploadedAt")
                         .HasColumnType("datetime(6)")
@@ -303,6 +748,166 @@ namespace PracticumProjects.Server.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("PracticumProjects.Server.Models.WeeklyReport", b =>
+                {
+                    b.Property<int>("ReportId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("report_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ReportId"));
+
+                    b.Property<string>("CoordinatorFeedback")
+                        .HasColumnType("longtext")
+                        .HasColumnName("coordinator_feedback");
+
+                    b.Property<int?>("CoordinatorId")
+                        .HasColumnType("int")
+                        .HasColumnName("coordinator_id");
+
+                    b.Property<DateTimeOffset?>("CoordinatorReviewedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("coordinator_reviewed_at");
+
+                    b.Property<string>("CoordinatorStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("coordinator_status");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("status");
+
+                    b.Property<int>("SubmittedByStudentId")
+                        .HasColumnType("int")
+                        .HasColumnName("submitted_by_student_id");
+
+                    b.Property<string>("SummaryText")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("summary_text");
+
+                    b.Property<string>("SupervisorFeedback")
+                        .HasColumnType("longtext")
+                        .HasColumnName("supervisor_feedback");
+
+                    b.Property<DateTimeOffset?>("SupervisorReviewedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("supervisor_reviewed_at");
+
+                    b.Property<string>("SupervisorStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("supervisor_status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("WeekNumber")
+                        .HasColumnType("int")
+                        .HasColumnName("week_number");
+
+                    b.HasKey("ReportId");
+
+                    b.HasIndex("GroupId", "WeekNumber")
+                        .IsUnique();
+
+                    b.ToTable("weekly_reports");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.Assignment", b =>
+                {
+                    b.HasOne("PracticumProjects.Server.Models.ThesisGroup", "ThesisGroup")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ThesisGroup");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.AssignmentSubmission", b =>
+                {
+                    b.HasOne("PracticumProjects.Server.Models.Assignment", "Assignment")
+                        .WithMany("Submissions")
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assignment");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.AvailableTime", b =>
+                {
+                    b.HasOne("PracticumProjects.Server.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.Board", b =>
+                {
+                    b.HasOne("PracticumProjects.Models.Semester", "Semester")
+                        .WithMany()
+                        .HasForeignKey("SemesterId");
+
+                    b.Navigation("Semester");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.BoardGroup", b =>
+                {
+                    b.HasOne("PracticumProjects.Server.Models.Board", "Board")
+                        .WithMany("BoardGroups")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PracticumProjects.Server.Models.ThesisGroup", "ThesisGroup")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Board");
+
+                    b.Navigation("ThesisGroup");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.BoardMember", b =>
+                {
+                    b.HasOne("PracticumProjects.Server.Models.Board", "Board")
+                        .WithMany("BoardMembers")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PracticumProjects.Server.Models.User", "Member")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Board");
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("PracticumProjects.Server.Models.GroupMember", b =>
                 {
                     b.HasOne("PracticumProjects.Server.Models.ThesisGroup", "ThesisGroup")
@@ -335,6 +940,84 @@ namespace PracticumProjects.Server.Migrations
                     b.Navigation("ThesisGroup");
                 });
 
+            modelBuilder.Entity("PracticumProjects.Server.Models.Meeting", b =>
+                {
+                    b.HasOne("PracticumProjects.Server.Models.AvailableTime", "AvailableTime")
+                        .WithMany()
+                        .HasForeignKey("AvailabilityId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("PracticumProjects.Server.Models.ThesisGroup", "ThesisGroup")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PracticumProjects.Server.Models.User", "Host")
+                        .WithMany()
+                        .HasForeignKey("HostId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PracticumProjects.Server.Models.User", "RequestedByUser")
+                        .WithMany()
+                        .HasForeignKey("RequestedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AvailableTime");
+
+                    b.Navigation("Host");
+
+                    b.Navigation("RequestedByUser");
+
+                    b.Navigation("ThesisGroup");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.MeetingSummary", b =>
+                {
+                    b.HasOne("PracticumProjects.Server.Models.Meeting", "Meeting")
+                        .WithOne("Summary")
+                        .HasForeignKey("PracticumProjects.Server.Models.MeetingSummary", "MeetingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PracticumProjects.Server.Models.User", "Submitter")
+                        .WithMany()
+                        .HasForeignKey("SubmittedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Meeting");
+
+                    b.Navigation("Submitter");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.StudentMark", b =>
+                {
+                    b.HasOne("PracticumProjects.Server.Models.User", "Evaluator")
+                        .WithMany()
+                        .HasForeignKey("EvaluatorId");
+
+                    b.HasOne("PracticumProjects.Server.Models.ThesisGroup", "ThesisGroup")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PracticumProjects.Server.Models.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Evaluator");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("ThesisGroup");
+                });
+
             modelBuilder.Entity("PracticumProjects.Server.Models.ThesisGroup", b =>
                 {
                     b.HasOne("PracticumProjects.Models.Semester", "Semester")
@@ -352,6 +1035,23 @@ namespace PracticumProjects.Server.Migrations
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.Assignment", b =>
+                {
+                    b.Navigation("Submissions");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.Board", b =>
+                {
+                    b.Navigation("BoardGroups");
+
+                    b.Navigation("BoardMembers");
+                });
+
+            modelBuilder.Entity("PracticumProjects.Server.Models.Meeting", b =>
+                {
+                    b.Navigation("Summary");
                 });
 
             modelBuilder.Entity("PracticumProjects.Server.Models.ThesisGroup", b =>

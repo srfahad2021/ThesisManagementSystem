@@ -268,4 +268,30 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+    public record ResetPasswordRequest(string NewPassword);
+
+    // ----------------------------------------------------
+    // POST: /api/user/{id}/reset-password (ADMIN ONLY)
+    // ----------------------------------------------------
+    [HttpPost("{id}/reset-password")]
+    [Authorize(Roles = "ADMIN,Admin")]
+    public async Task<IActionResult> ResetPassword(int id, [FromBody] ResetPasswordRequest dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.NewPassword))
+        {
+            return BadRequest(new { message = "New password cannot be empty." });
+        }
+
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+
+        // Hash and update the password
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = $"Password for user '{user.Username}' was successfully reset." });
+    }
 }

@@ -1,109 +1,447 @@
 import React, { useState, useEffect } from 'react';
-import Chart from 'chart.js/auto';
 import '../style.css';
-import { roles, getPageLabel } from '../../Information/RolesAndConfig.js';
-import { icons } from '../../Information/Icons.jsx';
 
+export default function SupervisorDocs() {
+  const [groups, setGroups] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(true);
 
-export default function supervisor_docs() {
+  // Group Documents Modal State
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [groupDocs, setGroupDocs] = useState([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
 
-  // Render active page dynamically
-  const renderContent = () => {
-      return (
-      <>
-        <div className="section-head" style={{ marginBottom: '20px' }}>
-  <div>
-    <div className="section-title" style={{ fontSize: '16px' }}>Document Review System</div>
-    <div className="text-muted text-sm">Google Docs-style inline commenting</div>
-  </div>
-</div>
+  // Review Modal State
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [reviewStatus, setReviewStatus] = useState('Approved');
+  const [reviewComments, setReviewComments] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState('');
 
-<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
-  <div className="card">
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-      <div>
-        <div style={{ fontWeight: 600 }}>Chapter 2 — Literature Review</div>
-        <div className="text-muted text-sm">Safwan Rahman · v1.3 · Jan 12, 2026</div>
-      </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <span className="badge badge-warning">5 Changes Requested</span>
-        <button className="btn-secondary btn-sm">← Prev</button>
-        <button className="btn-secondary btn-sm">Next →</button>
-      </div>
-    </div>
-    <div style={{ background: '#F9FAFB', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '20px', fontSize: '14px', lineHeight: 1.9, maxHeight: '360px', overflowY: 'auto' }}>
-      <p style={{ marginBottom: '12px' }}>2.1 Indoor Positioning Technologies</p>
-      <p style={{ marginBottom: '12px' }}>
-        Various technologies have been employed for indoor positioning systems (IPS), each presenting unique trade-offs between accuracy, cost, and infrastructure requirements.{' '}
-        <span style={{ background: '#FEF3C7', borderBottom: '2px solid #F59E0B', padding: '1px 2px' }} title="Comment 1">
-          GPS is widely used for outdoor navigation but is ineffective indoors due to signal attenuation through building materials
-        </span>
-        , making alternative solutions necessary.
-      </p>
-      <p style={{ marginBottom: '12px' }}>
-        Bluetooth Low Energy (BLE) beacons have emerged as a prominent solution for IPS.{' '}
-        <span style={{ background: '#DCFCE7', borderBottom: '2px solid #22C55E', padding: '1px 2px' }}>
-          Studies by Wang et al. (2022) demonstrated sub-2m accuracy using trilateration with 4+ beacons in line-of-sight conditions.
-        </span>
-      </p>
-      <p>
-        <span style={{ background: '#FEE2E2', borderBottom: '2px solid #EF4444', padding: '1px 2px' }} title="Comment 2">
-          WiFi fingerprinting, though infrastructure-independent, suffers from environmental changes affecting accuracy significantly over time.
-        </span>{' '}
-        Recent work by Ahmad (2023) addresses this through dynamic recalibration.
-      </p>
-    </div>
-  </div>
+  // Helper to fetch Auth Token
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
-  <div>
-    <div className="card" style={{ marginBottom: '12px' }}>
-      <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '12px' }}>Comments (5)</div>
-      <div className="comment-box">
-        <div className="comment-header">
-          <span className="comment-author" style={{ color: 'var(--warning)' }}>⚠ Revision #1</span>
-          <span className="text-muted" style={{ fontSize: '11px' }}>Jan 14</span>
-        </div>
-        <div className="comment-text">This statement needs a citation. Please add reference to a peer-reviewed study on GPS indoor limitations.</div>
-        <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-          <button className="btn-secondary btn-sm" style={{ fontSize: '11px' }}>Resolve</button>
-          <button className="btn-ghost btn-sm" style={{ fontSize: '11px' }}>Reply</button>
-        </div>
-      </div>
-      <div className="comment-box" style={{ background: '#FFF0F0', borderColor: '#FFC8C8' }}>
-        <div className="comment-header">
-          <span className="comment-author" style={{ color: 'var(--danger)' }}>✗ Revision #2</span>
-          <span className="text-muted" style={{ fontSize: '11px' }}>Jan 14</span>
-        </div>
-        <div className="comment-text">Needs more detail. How much accuracy loss? Quantify with specific data.</div>
-        <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-          <button className="btn-secondary btn-sm" style={{ fontSize: '11px' }}>Resolve</button>
-          <button className="btn-ghost btn-sm" style={{ fontSize: '11px' }}>Reply</button>
-        </div>
-      </div>
-    </div>
-    <div className="card">
-      <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '12px' }}>Add Comment</div>
-      <textarea className="form-control" placeholder="Highlight text then add your comment…" style={{ minHeight: '70px', marginBottom: '8px' }}></textarea>
-      <div style={{ display: 'flex', gap: '6px' }}>
-        <button className="btn-primary btn-sm">Request Revision</button>
-        <button className="btn-secondary btn-sm">Approve Section</button>
-      </div>
-    </div>
-  </div>
-</div>
-      </>
-    );
+  // 1. Fetch Supervisor's Assigned Groups
+  useEffect(() => {
+    fetchSupervisorGroups();
+  }, []);
+
+  const fetchSupervisorGroups = async () => {
+    try {
+      setLoadingGroups(true);
+      const response = await fetch('/api/Group/my-groups', {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGroups(data);
+      } else {
+        console.error('Failed to fetch supervised groups');
+      }
+    } catch (error) {
+      console.error('Error loading supervisor groups:', error);
+    } finally {
+      setLoadingGroups(false);
+    }
+  };
+
+  // 2. Open Documents Modal & Fetch Group Documents
+  const handleShowDocuments = async (group) => {
+    setSelectedGroup(group);
+    setLoadingDocs(true);
+    setGroupDocs([]);
+
+    try {
+      const response = await fetch(`/api/SubmissionFile/module/DocumentSubmission/${group.groupId}`, {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const docs = await response.json();
+        setGroupDocs(docs);
+      } else {
+        console.error('Failed to fetch group documents');
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setLoadingDocs(false);
+    }
+  };
+
+  // 3. Download Document
+  const handleDownload = async (fileId) => {
+    try {
+      const response = await fetch(`/api/SubmissionFile/download/${fileId}`, {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Download failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download error:', err);
+    }
+  };
+
+  // 4. Open Review Modal
+  const handleOpenReviewModal = (doc) => {
+    setSelectedDoc(doc);
+    setReviewStatus(doc.status || 'Approved');
+    setReviewComments(doc.reviewComments || '');
+    setReviewError('');
+  };
+
+  // 5. Submit Review Feedback
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!selectedDoc) return;
+
+    setIsSubmittingReview(true);
+    setReviewError('');
+
+    try {
+      const response = await fetch(`/api/SubmissionFile/review/${selectedDoc.fileId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          status: reviewStatus,
+          reviewComments: reviewComments.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        // Update document state locally inside groupDocs
+        setGroupDocs((prevDocs) =>
+          prevDocs.map((doc) =>
+            doc.fileId === selectedDoc.fileId
+              ? { ...doc, status: reviewStatus, reviewComments: reviewComments.trim() }
+              : doc
+          )
+        );
+        setSelectedDoc(null);
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        setReviewError(errData.message || 'Failed to submit review.');
+      }
+    } catch (error) {
+      setReviewError('An error occurred while saving the review.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  // Helper to extract clean document title and type
+  const parseDocumentDetails = (rawFileName) => {
+    const cleanName = rawFileName.replace(/\.[^/.]+$/, '');
+    const match = cleanName.match(/^(.*?) \[(.*?)\]$/);
+    if (match) {
+      return { title: match[1], type: match[2] };
+    }
+    return { title: cleanName, type: 'Document' };
   };
 
   return (
-    <>
-      <div className="layout">
-        <div className="main">
-          <div className="content">
-            {renderContent()}
+    <div className="layout">
+      <div className="main">
+        <div className="content">
+          <div className="section-head" style={{ marginBottom: '20px' }}>
+            <div>
+              <div className="section-title" style={{ fontSize: '18px', fontWeight: '600' }}>
+                Supervisor Document Review
+              </div>
+              <div className="text-muted text-sm">
+                View submitted thesis/project documents and provide feedback to your assigned groups.
+              </div>
+            </div>
           </div>
+
+          {/* Supervised Groups Table */}
+          <div className="card" style={{ padding: '0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
+            <div className="table-wrap" style={{ overflowX: 'auto' }}>
+              <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                    <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>
+                      Group Name
+                    </th>
+                    <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>
+                      Group Members
+                    </th>
+                    <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>
+                      Status
+                    </th>
+                    <th style={{ padding: '12px 20px 12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', textAlign: 'right' }}>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody style={{ divideY: '1px solid #f3f4f6' }}>
+                  {loadingGroups ? (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
+                        Loading assigned groups...
+                      </td>
+                    </tr>
+                  ) : groups.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: 'center', padding: '32px', color: '#6b7280' }}>
+                        No groups assigned to you yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    groups.map((group) => {
+                      const members = [
+                        group.student1?.fullName || group.student1?.username,
+                        group.student2?.fullName || group.student2?.username,
+                      ].filter(Boolean).join(', ');
+
+                      return (
+                        <tr key={group.groupId} className="data-table-row">
+                          <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                            <strong style={{ color: 'var(--text-primary, #111827)', fontSize: '14px' }}>
+                              {group.groupName}
+                            </strong>
+                          </td>
+                          <td style={{ padding: '12px 16px', verticalAlign: 'middle', color: '#4b5563', fontSize: '13px' }}>
+                            {members || 'No members assigned'}
+                          </td>
+                          <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                            <span className="badge badge-neutral">{group.status}</span>
+                          </td>
+                          <td style={{ padding: '12px 20px 12px 16px', verticalAlign: 'middle', textAlign: 'right' }}>
+                            <button
+                              className="btn-primary btn-sm"
+                              onClick={() => handleShowDocuments(group)}
+                            >
+                              Show Document
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Group Documents Modal */}
+          {selectedGroup && (
+            <div className="modal-overlay" style={modalOverlayStyle}>
+              <div className="modal-content card" style={{ ...modalContentStyle, width: '700px', maxWidth: '95vw' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>
+                      Documents for {selectedGroup.groupName}
+                    </h3>
+                    <div className="text-muted text-sm" style={{ marginTop: '2px' }}>
+                      Review uploaded materials and provide feedback.
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedGroup(null)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+                  {loadingDocs ? (
+                    <div style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
+                      Loading documents...
+                    </div>
+                  ) : groupDocs.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '32px', color: '#6b7280' }}>
+                      This group has not uploaded any documents yet.
+                    </div>
+                  ) : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                          <th style={{ padding: '10px', fontSize: '12px', color: '#6b7280' }}>Title</th>
+                          <th style={{ padding: '10px', fontSize: '12px', color: '#6b7280' }}>Type</th>
+                          <th style={{ padding: '10px', fontSize: '12px', color: '#6b7280' }}>Uploaded</th>
+                          <th style={{ padding: '10px', fontSize: '12px', color: '#6b7280' }}>Status</th>
+                          <th style={{ padding: '10px', fontSize: '12px', color: '#6b7280', textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {groupDocs.map((doc) => {
+                          const { title, type } = parseDocumentDetails(doc.fileName);
+                          const formattedDate = new Date(doc.uploadedAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          });
+
+                          const statusBadge =
+                            doc.status === 'Approved'
+                              ? 'badge-success'
+                              : doc.status === 'Revision Requested'
+                              ? 'badge-danger'
+                              : doc.status === 'Under Review'
+                              ? 'badge-warning'
+                              : 'badge-neutral';
+
+                          return (
+                            <tr key={doc.fileId} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                              <td style={{ padding: '10px', fontSize: '13px', fontWeight: '500' }}>{title}</td>
+                              <td style={{ padding: '10px' }}>
+                                <span className="badge badge-neutral">{type}</span>
+                              </td>
+                              <td style={{ padding: '10px', fontSize: '12px', color: '#6b7280' }}>{formattedDate}</td>
+                              <td style={{ padding: '10px' }}>
+                                <span className={`badge ${statusBadge}`}>{doc.status || 'Under Review'}</span>
+                              </td>
+                              <td style={{ padding: '10px', textAlign: 'right' }}>
+                                <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                  <button
+                                    className="btn-secondary btn-sm"
+                                    onClick={() => handleDownload(doc.fileId)}
+                                  >
+                                    Download
+                                  </button>
+                                  <button
+                                    className="btn-primary btn-sm"
+                                    onClick={() => handleOpenReviewModal(doc)}
+                                  >
+                                    Review
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+                  <button className="btn-secondary btn-sm" onClick={() => setSelectedGroup(null)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Review Modal */}
+          {selectedDoc && (
+            <div className="modal-overlay" style={{ ...modalOverlayStyle, zIndex: 1100 }}>
+              <div className="modal-content card" style={{ ...modalContentStyle, width: '480px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                  <h3 style={{ margin: 0, fontSize: '16px' }}>Review Document</h3>
+                  <button
+                    onClick={() => setSelectedDoc(null)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {reviewError && (
+                  <div style={{ color: 'var(--danger-color, red)', marginBottom: '10px', fontSize: '13px' }}>
+                    {reviewError}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmitReview}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '4px' }}>
+                      Document Name
+                    </label>
+                    <div style={{ fontSize: '14px', color: '#374151', padding: '6px 0' }}>
+                      {parseDocumentDetails(selectedDoc.fileName).title}
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '4px' }}>
+                      Review Status
+                    </label>
+                    <select
+                      value={reviewStatus}
+                      onChange={(e) => setReviewStatus(e.target.value)}
+                      style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    >
+                      <option value="Approved">Approved</option>
+                      <option value="Revision Requested">Revision Requested</option>
+                      <option value="Under Review">Under Review</option>
+                    </select>
+                  </div>
+
+                  <div style={{ marginBottom: '15px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '4px' }}>
+                      Review Feedback / Comments
+                    </label>
+                    <textarea
+                      rows="4"
+                      placeholder="Add specific recommendations, required revisions, or feedback..."
+                      value={reviewComments}
+                      onChange={(e) => setReviewComments(e.target.value)}
+                      style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px', resize: 'vertical' }}
+                    ></textarea>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
+                    <button
+                      type="button"
+                      className="btn-secondary btn-sm"
+                      onClick={() => setSelectedDoc(null)}
+                    >
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn-primary btn-sm" disabled={isSubmittingReview}>
+                      {isSubmittingReview ? 'Saving...' : 'Submit Review'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
+
+// Modal Overlay Styles
+const modalOverlayStyle = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1000,
+};
+
+const modalContentStyle = {
+  backgroundColor: '#fff',
+  borderRadius: '8px',
+  padding: '20px',
+};
