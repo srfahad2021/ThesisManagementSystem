@@ -223,8 +223,13 @@ export default function LeftNavbar({user, onPageChange }) {
 
         .user-name { 
           font-size: 13px; 
-          color: #fff; 
+          color: var(--primary); 
           font-weight: 500; 
+        }
+        .user-fullName { 
+          font-size: 13px; 
+          color: #fff; 
+          font-weight: 200;
         }
 
         .user-email { 
@@ -280,10 +285,10 @@ export default function LeftNavbar({user, onPageChange }) {
             </div>
             <div>
               <div className="user-name" id="sidebarUserName">
-                {user?.username || user?.Username || 'Loading...'}
+                {user?.username || 'Loading...'}
               </div>
               <div className="user-email" id="sidebarUserOrg">
-                {roleData.org}
+                {user?.email || 'No Email'} 
               </div>
             </div>
           </div>

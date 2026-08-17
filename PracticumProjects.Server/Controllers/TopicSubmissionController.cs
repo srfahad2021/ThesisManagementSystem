@@ -20,6 +20,72 @@ public class TopicSubmissionController : ControllerBase
         _context = context;
     }
 
+    // GET: api/TopicSubmission/all
+    // Retrieves all submissions join-mapped with ThesisGroup & Student names for Admin/Coordinator review
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllSubmissions()
+    {
+        // 1. Execute SQL query to fetch raw data objects from EF Core
+        var rawSubmissions = await (from t in _context.TopicSubmissions
+                                    join g in _context.ThesisGroups on t.GroupId equals g.GroupId into gGroup
+                                    from g in gGroup.DefaultIfEmpty()
+                                    join gm in _context.GroupMembers on t.GroupId equals gm.GroupId into gmGroup
+                                    from gm in gmGroup.DefaultIfEmpty()
+                                    join s1 in _context.Users on gm.StudentId1 equals s1.UserId into s1Group
+                                    from s1 in s1Group.DefaultIfEmpty()
+                                    join s2 in _context.Users on gm.StudentId2 equals s2.UserId into s2Group
+                                    from s2 in s2Group.DefaultIfEmpty()
+                                    select new
+                                    {
+                                        t.TopicId,
+                                        t.GroupId,
+                                        GroupName = g != null ? g.GroupName : null,
+                                        S1FirstName = s1 != null ? s1.FirstName : null,
+                                        S1LastName = s1 != null ? s1.LastName : null,
+                                        S2FirstName = s2 != null ? s2.FirstName : null,
+                                        S2LastName = s2 != null ? s2.LastName : null,
+                                        t.Title,
+                                        t.Abstract,
+                                        t.Keywords,
+                                        t.ProblemStatement,
+                                        t.Objectives,
+                                        StatusEnum = t.Status,
+                                        t.SupervisorFeedback,
+                                        t.CoordinatorFeedback,
+                                        t.CreatedAt,
+                                        t.UpdatedAt
+                                    }).ToListAsync();
+
+        // 2. Perform string formatting safely in-memory (LINQ to Objects)
+        var result = rawSubmissions.Select(t => {
+            var s1Name = $"{t.S1FirstName} {t.S1LastName}".Trim();
+            var s2Name = $"{t.S2FirstName} {t.S2LastName}".Trim();
+
+            var studentNamesList = new[] { s1Name, s2Name }
+                .Where(n => !string.IsNullOrWhiteSpace(n));
+
+            return new
+            {
+                t.TopicId,
+                t.GroupId,
+                GroupName = !string.IsNullOrWhiteSpace(t.GroupName) ? t.GroupName : $"Group {t.GroupId:D2}",
+                StudentNames = string.Join(" & ", studentNamesList),
+                Title = t.Title ?? string.Empty,
+                Abstract = t.Abstract ?? string.Empty,
+                Keywords = t.Keywords,
+                ProblemStatement = t.ProblemStatement ?? string.Empty,
+                Objectives = t.Objectives ?? string.Empty,
+                Status = t.StatusEnum.ToString(),
+                t.SupervisorFeedback,
+                t.CoordinatorFeedback,
+                t.CreatedAt,
+                t.UpdatedAt
+            };
+        });
+
+        return Ok(result);
+    }
+
     // GET: api/TopicSubmission/my-topic
     // Fetches the topic submission for the group assigned to the authenticated student
     [HttpGet("my-topic")]

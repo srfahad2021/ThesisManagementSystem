@@ -274,7 +274,7 @@ public class AuthController : ControllerBase
     // POST: /api/user/{id}/reset-password (ADMIN ONLY)
     // ----------------------------------------------------
     [HttpPost("{id}/reset-password")]
-    [Authorize(Roles = "ADMIN,Admin")]
+    [Authorize(Roles = "ADMIN")]
     public async Task<IActionResult> ResetPassword(int id, [FromBody] ResetPasswordRequest dto)
     {
         if (string.IsNullOrWhiteSpace(dto.NewPassword))
@@ -293,5 +293,50 @@ public class AuthController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(new { message = $"Password for user '{user.Username}' was successfully reset." });
+    }
+
+
+    // ----------------------------------------------------
+    // POST: /api/user/{id}/change-password
+    // ----------------------------------------------------
+    [HttpPost("{id}/change-password")]
+    // [Authorize(Role = "STUDENT")]
+    public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest dto)
+    {
+        // 1. Validate inputs
+        if (string.IsNullOrWhiteSpace(dto.CurrentPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
+        {
+            return BadRequest(new { message = "Current password and new password are required." });
+        }
+
+        if (dto.NewPassword.Length < 6)
+        {
+            return BadRequest(new { message = "New password must be at least 6 characters long." });
+        }
+
+        // 2. Fetch user
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+
+        // 3. Verify current password using BCrypt
+        bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash);
+        if (!isPasswordValid)
+        {
+            return BadRequest(new { message = "Incorrect current password." });
+        }
+
+        // 4. Hash and update new password
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Password updated successfully." });
+    }
+    public class ChangePasswordRequest
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

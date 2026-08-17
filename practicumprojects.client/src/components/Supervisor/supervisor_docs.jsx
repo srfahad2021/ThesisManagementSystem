@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '../style.css';
 
 export default function SupervisorDocs() {
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Group Documents Modal State
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -48,6 +49,25 @@ export default function SupervisorDocs() {
       setLoadingGroups(false);
     }
   };
+
+  // Filter groups based on search query (group name or student names/usernames)
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return groups;
+    const query = searchQuery.toLowerCase().trim();
+
+    return groups.filter((group) => {
+      const groupNameMatches = group.groupName?.toLowerCase().includes(query);
+
+      const student1Name = group.student1?.fullName || group.student1?.username || '';
+      const student2Name = group.student2?.fullName || group.student2?.username || '';
+      
+      const memberMatches =
+        student1Name.toLowerCase().includes(query) ||
+        student2Name.toLowerCase().includes(query);
+
+      return groupNameMatches || memberMatches;
+    });
+  }, [groups, searchQuery]);
 
   // 2. Open Documents Modal & Fetch Group Documents
   const handleShowDocuments = async (group) => {
@@ -163,7 +183,7 @@ export default function SupervisorDocs() {
     <div className="layout">
       <div className="main">
         <div className="content">
-          <div className="section-head" style={{ marginBottom: '20px' }}>
+          <div className="section-head" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <div className="section-title" style={{ fontSize: '18px', fontWeight: '600' }}>
                 Supervisor Document Review
@@ -171,6 +191,25 @@ export default function SupervisorDocs() {
               <div className="text-muted text-sm">
                 View submitted thesis/project documents and provide feedback to your assigned groups.
               </div>
+            </div>
+
+            {/* Search Input Bar */}
+            <div style={{ minWidth: '260px', flex: '0 1 320px' }}>
+              <input
+                type="text"
+                placeholder="Search by group name or member..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '13px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  outline: 'none',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                }}
+              />
             </div>
           </div>
 
@@ -187,8 +226,11 @@ export default function SupervisorDocs() {
                       Group Members
                     </th>
                     <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>
-                      Status
+                      Supervisor
                     </th>
+                    {/* <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>
+                      Status
+                    </th> */}
                     <th style={{ padding: '12px 20px 12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', textAlign: 'right' }}>
                       Actions
                     </th>
@@ -197,22 +239,25 @@ export default function SupervisorDocs() {
                 <tbody style={{ divideY: '1px solid #f3f4f6' }}>
                   {loadingGroups ? (
                     <tr>
-                      <td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
+                      <td colSpan="5" style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
                         Loading assigned groups...
                       </td>
                     </tr>
-                  ) : groups.length === 0 ? (
+                  ) : filteredGroups.length === 0 ? (
                     <tr>
-                      <td colSpan="4" style={{ textAlign: 'center', padding: '32px', color: '#6b7280' }}>
-                        No groups assigned to you yet.
+                      <td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: '#6b7280' }}>
+                        {searchQuery ? 'No groups found matching your search.' : 'No groups assigned to you yet.'}
                       </td>
                     </tr>
                   ) : (
-                    groups.map((group) => {
+                    filteredGroups.map((group) => {
                       const members = [
                         group.student1?.fullName || group.student1?.username,
                         group.student2?.fullName || group.student2?.username,
                       ].filter(Boolean).join(', ');
+
+                      const supervisorName =
+                        group.supervisor?.fullName || group.supervisor?.username || 'Unassigned';
 
                       return (
                         <tr key={group.groupId} className="data-table-row">
@@ -224,9 +269,12 @@ export default function SupervisorDocs() {
                           <td style={{ padding: '12px 16px', verticalAlign: 'middle', color: '#4b5563', fontSize: '13px' }}>
                             {members || 'No members assigned'}
                           </td>
-                          <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                            <span className="badge badge-neutral">{group.status}</span>
+                          <td style={{ padding: '12px 16px', verticalAlign: 'middle', color: '#4b5563', fontSize: '13px' }}>
+                            {supervisorName}
                           </td>
+                          {/* <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                            <span className="badge badge-neutral">{group.status}</span>
+                          </td> */}
                           <td style={{ padding: '12px 20px 12px 16px', verticalAlign: 'middle', textAlign: 'right' }}>
                             <button
                               className="btn-primary btn-sm"

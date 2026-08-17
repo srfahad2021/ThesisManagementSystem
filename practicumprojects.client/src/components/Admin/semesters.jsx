@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '../style.css';
 
 // Semester Row Helper Function
@@ -30,6 +30,13 @@ export function semRow(sem, year, start, end, groups, status, onEdit) {
 export default function Semesters() {
   const [semesters, setSemesters] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -158,15 +165,65 @@ export default function Semesters() {
     }
   };
 
+  // Filter semesters based on search term (semester name/type, year, or status)
+  const filteredSemesters = useMemo(() => {
+    return semesters.filter((sem) => {
+      const query = searchQuery.toLowerCase().trim();
+      if (!query) return true;
+
+      const semTerm = (sem.semesterType || sem.sem || '').toLowerCase();
+      const semYear = String(sem.year || '').toLowerCase();
+      const semStatus = (sem.status || '').toLowerCase();
+
+      return (
+        semTerm.includes(query) ||
+        semYear.includes(query) ||
+        semStatus.includes(query)
+      );
+    });
+  }, [semesters, searchQuery]);
+
+  // Reset page index when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Pagination calculations
+  const totalSemesters = filteredSemesters.length;
+  const totalPages = Math.ceil(totalSemesters / itemsPerPage) || 1;
+  const startIdx = totalSemesters === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endIdx = Math.min(currentPage * itemsPerPage, totalSemesters);
+
+  const paginatedSemesters = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredSemesters.slice(start, start + itemsPerPage);
+  }, [filteredSemesters, currentPage, itemsPerPage]);
+
   return (
     <div className="layout">
       <div className="main">
         <div className="content">
-          <div className="section-head" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
             <div>
               <div className="section-title" style={{ fontSize: '16px', fontWeight: 600 }}>Semester Management</div>
+              <div className="text-muted text-sm">
+                Showing {startIdx}–{endIdx} of {totalSemesters} semester(s)
+              </div>
             </div>
-            <button className="btn-primary" onClick={handleOpenCreateModal}>+ New Semester</button>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* Search Bar Input */}
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search semester, year..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ width: '260px', padding: '6px 12px', fontSize: '14px' }}
+              />
+
+              <button className="btn-primary" onClick={handleOpenCreateModal}>+ New Semester</button>
+            </div>
           </div>
 
           <div className="card">
@@ -190,14 +247,18 @@ export default function Semesters() {
                         Loading semesters...
                       </td>
                     </tr>
-                  ) : semesters.length === 0 ? (
+                  ) : paginatedSemesters.length === 0 ? (
                     <tr>
                       <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
-                        No semesters found. Click <strong>+ New Semester</strong> to create one.
+                        {searchQuery ? (
+                          <>No semesters matching "<strong>{searchQuery}</strong>"</>
+                        ) : (
+                          <>No semesters found. Click <strong>+ New Semester</strong> to create one.</>
+                        )}
                       </td>
                     </tr>
                   ) : (
-                    semesters.map((sem) =>
+                    paginatedSemesters.map((sem) =>
                       semRow(
                         sem.semesterType || sem.sem,
                         sem.year,
@@ -211,6 +272,29 @@ export default function Semesters() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Pagination Controls */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+            <div className="text-muted text-sm">
+              Showing {startIdx}–{endIdx} of {totalSemesters} semesters
+            </div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                className="btn-secondary btn-sm"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <button
+                className="btn-primary btn-sm"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage >= totalPages}
+              >
+                Next
+              </button>
             </div>
           </div>
 

@@ -42,8 +42,8 @@ export function NoticeCard({ notice, currentUserId, userRole, onEdit, onDelete, 
               </button>
             )}
             <button
-              className="btn-secondary"
-              style={{ padding: '4px 8px', fontSize: '12px', backgroundColor: '#dc3545', color: '#fff', border: 'none' }}
+              className="btn-primary"
+              style={{ padding: '4px 8px', fontSize: '12px'}}
               onClick={() => onDelete(notice.noticeId)}
             >
               Delete

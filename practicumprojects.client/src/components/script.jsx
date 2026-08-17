@@ -140,9 +140,9 @@ export function topicCard(title, student, keywords, status, type) {
         ))}
       </div>
       <div style={{ display: 'flex', gap: '8px' }}>
-        <button className="btn-primary btn-sm">Approve</button>
+        {/* <button className="btn-primary btn-sm">Approve</button>
         <button className="btn-secondary btn-sm">Request Revision</button>
-        <button className="btn-secondary btn-sm">Reject</button>
+        <button className="btn-secondary btn-sm">Reject</button> */}
         <button className="btn-ghost btn-sm">View Full →</button>
       </div>
     </div>

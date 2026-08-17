@@ -6,21 +6,29 @@ import { getPageLabel } from './Information/RolesAndConfig.js';
 
 export default function App({ page = 'dashboard' }) {
     const [user, setUser] = useState(() => {
-        const savedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const savedUser = sessionStorage.getItem('user');
         return savedUser ? JSON.parse(savedUser) : null;
     });
 
     const [activeRole, setActiveRole] = useState(() => {
-        return user?.role || user?.Role || 'ADMIN';
+        return user?.role || 'ADMIN';
     });
 
     const [currentPage, setCurrentPage] = useState(page);
 
     useEffect(() => {
-        if (user?.role || user?.Role) {
-            setActiveRole(user.role || user.Role);
+        if (user?.role) {
+            setActiveRole(user.role);
         }
     }, [user]);
+
+    const handleUserUpdated = (updatedUser) => {
+        // 1. Update React state so the UI updates instantly
+        setUser(updatedUser);
+
+        // 2. Safely update user in storage while keeping tokens intact 
+        sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -35,25 +43,26 @@ export default function App({ page = 'dashboard' }) {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F7F6F3' }}>
-            {/* 1. Left Navbar Fixed Sidebar (240px) */}
-            (user & 
+            {/* 1. Left Navbar Fixed Sidebar */}
+            {user && (
                 <LeftNavbar
                     user={user}
                     onPageChange={({ pageId }) => setCurrentPage(pageId)}
                 />
-            );
+            )}
 
             {/* 2. Main Content Wrapper Offset by Sidebar Width */}
-            <div style={{ marginLeft: '180px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <TopNavbar
                     user={user}
                     onRoleChange={(newRole) => setActiveRole(newRole)}
                     pageTitle={pageTitle}
                     breadcrumb={`Home / ${pageTitle}`}
                     onLogout={handleLogout}
+                    onUserUpdated={handleUserUpdated}
                 />
 
-                {/* 3. Main Body Offset by TopNavbar Height (56px) */}
+                {/* 3. Main Body */}
                 <main style={{ 
                     marginTop: '36px', 
                     padding: '24px', 

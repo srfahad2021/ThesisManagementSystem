@@ -122,8 +122,29 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return <Coordinator_ex_evaluate user={user}/>; 
                 case 'coordinator_ex_reports':
                     return <Coordinator_ex_reports user={user}/>;
+                case 'supervisor_topics':
+                    return <Supervisor_topics user={user}/>;
+                case 'supervisor_reports':
+                    return <Supervisor_reports user={user}/>; 
+                case 'supervisor_docs':
+                    return <Supervisor_docs user={user}/>;
+                case 'supervisor_meetings':
+                    return <Supervisor_meetings user={user}/>;
+                case 'supervisor_assignments':
+                    return <Supervisor_assignments user={user}/>;
+                case 'topics':
+                    return <Topics user={user}/>;
+                case 'progress':
+                    return <Progress user={user}/>;
+                case 'documents':
+                    return <Documents user={user}/>;
                 case 'coordinator_notice':
-                    return <Coordinator_notice user={user}/>; 
+                    return <Coordinator_notice user={user}/>;
+                case 'supervisor_eval_edit':
+                    return <Supervisor_eval_edit user={user}/>;
+                case 'supervisor_eval_request':
+                    return <Supervisor_eval_request user={user}/>;
+                  
                     
                 default:
                     return (

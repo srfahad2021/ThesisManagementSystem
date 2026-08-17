@@ -1,212 +1,295 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import './topnavbar.css';
 
-const roleNames = [
-  "ADMIN",
-  "COORDINATOR",
-  "CHAIRMAN",
-  "SUPERVISOR",
-  "STUDENT",
-  "EXAMINER",
-];
+/* --- Edit Profile Modal Component --- */
+function UserEditPopup({ isOpen, user, onClose, onSuccess }) {
+  const [formData, setFormData] = useState({ fullName: '', email: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // Re-sync form fields whenever user object changes or modal opens
+  useEffect(() => {
+    if (user && isOpen) {
+      setFormData({
+        fullName: user.fullName || user.name || (user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : ''),
+        email: user.email || '',
+      });
+      setErrorMessage('');
+    }
+  }, [user, isOpen]);
 
+  if (!isOpen || !user) return null;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setErrorMessage('');
+
+    const token = sessionStorage.getItem('token');
+    const userId = user.userId || user.id || user._id;
+
+    try {
+      const response = await fetch(`/api/user/editprofile/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to update profile (${response.status})`);
+      }
+
+      // Read response payload if backend returns updated user
+      const responseData = await response.json().catch(() => null);
+
+      // Create updated user state
+      const updatedUser = responseData || {
+        ...user,
+        fullName: formData.fullName,
+        firstName: formData.fullName.split(' ')[0] || formData.fullName,
+        lastName: formData.fullName.split(' ').slice(1).join(' ') || '',
+        email: formData.email
+      };
+
+      // Notify parent component to update state & local/session storage
+      if (onSuccess) {
+        onSuccess(updatedUser);
+      }
+
+      onClose();
+    } catch (err) {
+      setErrorMessage(err.message || 'An error occurred while updating profile.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-card">
+        <div className="modal-header">
+          <h3 className="modal-title">Edit Profile</h3>
+          <button type="button" onClick={onClose} className="modal-close-btn">✕</button>
+        </div>
+
+        {errorMessage && <div className="error-banner">{errorMessage}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">
+              Username <span className="form-hint">(Cannot be modified)</span>
+            </label>
+            <input type="text" value={user.username || ''} disabled className="form-control" />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Full Name</label>
+            <input
+              type="text"
+              name="fullName"
+              placeholder="Enter full name"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Email Address</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="user@iubat.edu"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
+
+          <div className="form-group-lg">
+            <label className="form-label">
+              Role <span className="form-hint">(Cannot be modified)</span>
+            </label>
+            <input type="text" value={user.role || ''} disabled className="form-control" />
+          </div>
+
+          <div className="modal-actions">
+            <button type="button" className="btn-secondary" onClick={onClose} disabled={submitting}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary" disabled={submitting}>
+              {submitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* --- Password Change Modal Component --- */
+function PasswordChangePopup({ isOpen, user, onClose, onSuccess }) {
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setErrorMessage('');
+    }
+  }, [isOpen]);
+
+  if (!isOpen || !user) return null;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setErrorMessage('New password and confirm password do not match.');
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMessage('');
+
+    const token = sessionStorage.getItem('token') || '';
+    const userId = user.userId || user.id || user._id;
+
+    try {
+      const response = await fetch(`/api/auth/${userId}/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to change password (${response.status})`);
+      }
+
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (err) {
+      setErrorMessage(err.message || 'An error occurred while updating the password.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-card">
+        <div className="modal-header">
+          <h3 className="modal-title">Change Password</h3>
+          <button type="button" onClick={onClose} className="modal-close-btn">✕</button>
+        </div>
+
+        {errorMessage && <div className="error-banner">{errorMessage}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">Current Password</label>
+            <input
+              type="password"
+              name="currentPassword"
+              placeholder="Enter current password"
+              value={passwordData.currentPassword}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">New Password</label>
+            <input
+              type="password"
+              name="newPassword"
+              placeholder="Enter new password"
+              value={passwordData.newPassword}
+              onChange={handleChange}
+              required
+              minLength={6}
+              className="form-control"
+            />
+          </div>
+
+          <div className="form-group-lg">
+            <label className="form-label">Confirm New Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Re-enter new password"
+              value={passwordData.confirmPassword}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
+
+          <div className="modal-actions">
+            <button type="button" className="btn-secondary" onClick={onClose} disabled={submitting}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary" disabled={submitting}>
+              {submitting ? 'Updating...' : 'Update Password'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* --- Main TopNavbar Component --- */
 const TopNavbar = ({ 
   user,
   onRoleChange, 
   pageTitle = 'Dashboard', 
   breadcrumb = `Home / ${pageTitle}`,
-  onLogout
+  onLogout,
+  onUserUpdated
 }) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+
   if(!user){
     return null;
   }
   const activeRole = user?.role;
+
   return (
     <>
-      {/* Embedded CSS Resets and Styles */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@500;600;700&display=swap');
-
-        /* Force reset margins, padding, and layout constraints on parent elements */
-        html, body, #root, #__next {
-          margin: 0 !important;
-          padding: 0 !important;
-          width: 100% !important;
-          max-width: 100% !important;
-          box-sizing: border-box !important;
-        }
-
-        :root {
-          --primary: #FF6B6B;
-          --primary-light: #FF8E72;
-          --accent: #FFA07A;
-          --bg: #F7F6F3;
-          --bg-card: #FFFFFF;
-          --sidebar-bg: #1F2937;
-          --sidebar-text: #D1D5DB;
-          --sidebar-active: #FF6B6B;
-          --border: #E5E7EB;
-          --text-primary: #1F2937;
-          --text-secondary: #6B7280;
-          --text-muted: #9CA3AF;
-          --success: #22C55E;
-          --warning: #F59E0B;
-          --danger: #EF4444;
-          --danger-hover: #DC2626;
-          --info: #3B82F6;
-          --radius: 10px;
-          --radius-sm: 6px;
-          --shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
-          --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-        }
-
-        .topbar-wrapper * {
-          box-sizing: border-box;
-          margin: 0;
-          padding: 0;
-        }
-
-        .topbar-wrapper {
-          font-family: 'DM Sans', sans-serif;
-          position: fixed;
-          top: 0;
-          left: 240px; /* Offset by LeftNavbar width */
-          right: 0;
-          width: calc(100% - 240px);
-          z-index: 9999;
-        }
-
-        .topbar {
-          height: 56px;
-          background: var(--bg-card);
-          border-bottom: 1px solid var(--border);
-          display: flex;
-          align-items: center;
-          padding: 0 24px;
-          gap: 16px;
-          width: 100%;
-        }
-
-        .topbar-title {
-          font-family: 'Poppins', sans-serif;
-          font-weight: 600;
-          font-size: 16px;
-          color: var(--text-primary);
-          text-transform: capitalize;
-        }
-
-        .topbar-breadcrumb {
-          font-size: 12px;
-          color: var(--text-muted);
-        }
-
-        .topbar-right {
-          margin-left: auto;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .user-badge {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 4px 10px;
-          background: var(--bg);
-          border-radius: 20px;
-          border: 1px solid var(--border);
-          font-size: 12px;
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .role-tag {
-          font-size: 10px;
-          font-weight: 700;
-          background: var(--primary);
-          color: #fff;
-          padding: 2px 6px;
-          border-radius: 10px;
-          text-transform: uppercase;
-        }
-
-        .icon-btn {
-          width: 34px;
-          height: 34px;
-          border-radius: var(--radius-sm);
-          border: 1px solid var(--border);
-          background: transparent;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--text-secondary);
-          transition: all 0.15s;
-        }
-
-        .icon-btn svg {
-          width: 18px;
-          height: 18px;
-        }
-
-        .icon-btn:hover {
-          background: var(--bg);
-          color: var(--text-primary);
-        }
-
-        .notif-dot {
-          position: relative;
-        }
-
-        .notif-dot::after {
-          content: '3';
-          position: absolute;
-          top: -4px;
-          right: -4px;
-          background: var(--primary);
-          color: #fff;
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          font-size: 9px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-        }
-
-        /* Logout Button Styling */
-        .logout-btn {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          height: 34px;
-          padding: 0 12px;
-          border-radius: var(--radius-sm);
-          border: 1px solid rgba(239, 68, 68, 0.2);
-          background: rgba(239, 68, 68, 0.05);
-          color: var(--danger);
-          font-family: 'DM Sans', sans-serif;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .logout-btn svg {
-          width: 16px;
-          height: 16px;
-        }
-
-        .logout-btn:hover {
-          background: var(--danger);
-          color: #ffffff;
-          border-color: var(--danger);
-          box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
-        }
-      `}</style>
-
-      {/* Navigation Topbar */}
       <div className="topbar-wrapper">
         <header className="topbar">
           <div>
@@ -215,43 +298,59 @@ const TopNavbar = ({
           </div>
 
           <div className="topbar-right">
-            {/* Display logged-in user name & role */}
             {user && (
               <div className="user-badge">
-                <span>{user.firstName ? `${user.firstName}` : user.username}</span>
+                <span>{<user className="first"></user> ? `${user.firstName + " " + user.lastName}` : user.username}</span>
                 <span className="role-tag">{activeRole}</span>
               </div>
             )}
 
-            {/* Notification Button */}
-            <button className="icon-btn notif-dot" title="Notifications">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-            </button>
+            {/* Settings Menu Dropdown */}
+            <div className="settings-menu-container">
+              <button 
+                className="icon-btn" 
+                title="Settings"
+                onClick={() => setDropdownOpen((prev) => !prev)}
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </button>
 
-            {/* Settings Button */}
-            <button className="icon-btn" title="Settings">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </button>
+              {dropdownOpen && (
+                <div className="settings-dropdown">
+                  <button 
+                    className="dropdown-item" 
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      setIsEditOpen(true);
+                    }}
+                  >
+                    Edit Profile
+                  </button>
+                  <button 
+                    className="dropdown-item" 
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      setIsPasswordOpen(true);
+                    }}
+                  >
+                    Change Password
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Logout Button */}
             <button className="logout-btn" title="Sign Out" onClick={onLogout}>
@@ -268,6 +367,20 @@ const TopNavbar = ({
           </div>
         </header>
       </div>
+
+      <UserEditPopup 
+        isOpen={isEditOpen} 
+        user={user} 
+        onClose={() => setIsEditOpen(false)} 
+        onSuccess={onUserUpdated} 
+      />
+
+      <PasswordChangePopup 
+        isOpen={isPasswordOpen} 
+        user={user} 
+        onClose={() => setIsPasswordOpen(false)} 
+        onSuccess={() => alert('Password updated successfully!')} 
+      />
     </>
   );
 };

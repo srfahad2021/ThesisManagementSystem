@@ -14,6 +14,10 @@ export default function Admin_notice() {
   const [editingNotice, setEditingNotice] = useState(null);
   const [error, setError] = useState(null);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Adjust items per page as needed
+
   const getAuthHeader = () => ({
     'Authorization': `Bearer ${sessionStorage.getItem('token')}`
   });
@@ -31,6 +35,7 @@ export default function Admin_notice() {
       });
       if (!res.ok) throw new Error('Failed to load notices.');
       setNotices(await res.json());
+      setCurrentPage(1); // Reset to first page on filter change/data reload
     } catch (err) {
       setError(err.message);
     } finally {
@@ -94,6 +99,13 @@ export default function Admin_notice() {
     }
   };
 
+  // Pagination calculation values
+  const totalEntries = notices.length;
+  const totalPages = Math.ceil(totalEntries / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalEntries);
+  const currentNotices = notices.slice(startIndex, endIndex);
+
   return (
     <div className="layout">
       <div className="main">
@@ -101,7 +113,6 @@ export default function Admin_notice() {
           <div className="section-head" style={{ marginBottom: '20px' }}>
             <div>
               <div className="section-title" style={{ fontSize: '18px' }}>Admin Notice Board</div>
-              <div className="text-muted text-sm">Global Notice Management System.</div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <select className="form-control" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
@@ -121,7 +132,7 @@ export default function Admin_notice() {
                 ))}
               </select>
 
-              <button className="btn-primary" onClick={() => { setEditingNotice(null); setIsModalOpen(true); }}>
+              <button className="btn-primary" style={{ width: '320px' }} onClick={() => { setEditingNotice(null); setIsModalOpen(true); }}>
                 + Create Notice
               </button>
             </div>
@@ -131,19 +142,45 @@ export default function Admin_notice() {
 
           {loading ? (
             <div className="card"><p className="text-muted">Loading notices...</p></div>
-          ) : notices.length === 0 ? (
+          ) : totalEntries === 0 ? (
             <div className="card"><p className="text-muted">No notices found.</p></div>
           ) : (
-            notices.map((n) => (
-              <NoticeCard
-                key={n.noticeId}
-                notice={n}
-                userRole="ADMIN"
-                onEdit={(notice) => { setEditingNotice(notice); setIsModalOpen(true); }}
-                onDelete={handleDeleteNotice}
-                onDownloadAttachment={handleDownload}
-              />
-            ))
+            <>
+              {currentNotices.map((n) => (
+                <NoticeCard
+                  key={n.noticeId}
+                  notice={n}
+                  userRole="ADMIN"
+                  onEdit={(notice) => { setEditingNotice(notice); setIsModalOpen(true); }}
+                  onDelete={handleDeleteNotice}
+                  onDownloadAttachment={handleDownload}
+                />
+              ))}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  Showing {totalEntries > 0 ? startIndex + 1 : 0}–{endIndex} of {totalEntries} entries
+                </span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn-secondary btn-sm"
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    style={{ opacity: 1, cursor: 'pointer' }}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="btn-primary btn-sm"
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages || totalEntries === 0}
+                    style={{ opacity: 1, cursor: 'pointer' }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </>
           )}
 
           <NoticeModal

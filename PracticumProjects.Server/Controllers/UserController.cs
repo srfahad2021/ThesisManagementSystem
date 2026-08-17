@@ -9,7 +9,7 @@ namespace PracticumProjects.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "ADMIN")]
+// [Authorize(Roles = "ADMIN")]
 public class UserController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -71,6 +71,51 @@ public class UserController : ControllerBase
         await _context.SaveChangesAsync();
         return Ok(new { message = "User updated successfully." });
     }
+
+    public class EditProfileDto
+    {
+        public string? FullName { get; set; }
+        public string? Email { get; set; }
+    }
+
+    /// <summary>
+/// PUT: api/user/editprofile/{id}
+/// Updates user self-profile info (FullName, Email only).
+/// </summary>
+[HttpPut("editprofile/{id:int}")]
+public async Task<IActionResult> EditProfile(int id, [FromBody] EditProfileDto model)
+{
+    var user = await _context.Users.FindAsync(id);
+    if (user == null)
+        return NotFound(new { message = $"User with ID {id} not found." });
+
+    if (!string.IsNullOrWhiteSpace(model.FullName))
+    {
+        var parts = model.FullName.Trim().Split(' ', 2);
+        user.FirstName = parts[0];
+        user.LastName = parts.Length > 1 ? parts[1] : string.Empty;
+    }
+
+    if (!string.IsNullOrWhiteSpace(model.Email))
+    {
+        user.Email = model.Email;
+    }
+
+    await _context.SaveChangesAsync();
+
+    // Return the updated user object matching your desired structure
+    return Ok(new
+    {
+        userId = user.UserId, // adjust property name if your entity uses Id
+        username = user.Username,
+        email = user.Email,
+        firstName = user.FirstName,
+        lastName = user.LastName,
+        role = user.Role,
+        isActive = user.IsActive,
+        isProfileCompleted = user.IsProfileCompleted
+    });
+}
 
     /// <summary>
     /// PUT: api/user/{id}/status

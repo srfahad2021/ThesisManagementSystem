@@ -2,112 +2,141 @@ import { icons } from './Icons.jsx';
 
 export const roles = {
   ADMIN: {
-    label: 'Admin',
+    label: 'Administrator',
     initials: 'DA',
     name: 'Dr. Ahmed Reza',
-    org: 'IUBAT · CSE Dept',
+    org: 'IUBAT · CSE Department',
     nav: [
-      { section: 'Overview', items: [
+      { section: 'Dashboard & Insights', items: [
         { id: 'dashboard', icon: icons.homeIcon, label: 'Dashboard' },
-        { id: 'analytics', icon: icons.chartIcon, label: 'Analytics' },
+        { id: 'analytics', icon: icons.chartIcon, label: 'Academic Analytics' },
       ]},
-      { section: 'Management', items: [
+      { section: 'Administration', items: [
         { id: 'users', icon: icons.userIcon, label: 'User Accounts', badge: '3' },
         { id: 'groups', icon: icons.groupIcon, label: 'Thesis Groups' },
         { id: 'semesters', icon: icons.calIcon, label: 'Semesters' },
-        { id: 'boards', icon: icons.boardIcon, label: 'Boards' },
-        { id: 'board_assign_group', icon: icons.groupIcon, label: 'Group Assign(Board)' },
-        { id: 'admin_eval_request', icon: icons.evalIcon, label: 'Re-Evaluation Request' },
-        { id: 'admin_notice', icon: icons.evalIcon, label: 'Notices' },
+        { id: 'boards', icon: icons.boardIcon, label: 'Examination Boards' },
+        { id: 'board_assign_group', icon: icons.groupIcon, label: 'Board-Group Assignment' },
+        { id: 'admin_eval_request', icon: icons.evalIcon, label: 'Re-evaluation Requests' },
       ]},
-      { section: 'Academic', items: [
+      { section: 'Monitoring', items: [
         { id: 'topics', icon: icons.topicIcon, label: 'Topic Review' },
-        { id: 'progress', icon: icons.progressIcon, label: 'Weekly Progress' },
-        { id: 'documents', icon: icons.docIcon, label: 'Documents' },
-        { id: 'attendance', icon: icons.attendIcon, label: 'Attendance' },
+        { id: 'progress', icon: icons.progressIcon, label: 'Progress Monitoring' },
+        { id: 'documents', icon: icons.docIcon, label: 'Thesis Documents' },
       ]},
-      { section: 'Reports', items: [
-        { id: 'reports', icon: icons.reportIcon, label: 'Reports & Export' },
-        { id: 'audit', icon: icons.auditIcon, label: 'Audit Logs' },
+      
+      { section: 'Reports & Records', items: [
+        { id: 'reports', icon: icons.reportIcon, label: 'Reports & Exports' },
       ]},
-      { section: 'CMS', items: [
-        { id: 'cms', icon: icons.cmsIcon, label: 'Content Manager' },
+      { section: 'Announcements', items: [
+        { id: 'admin_notice', icon: icons.noticeIcon, label: 'Notices' },
       ]},
-    ]
+    ],
   },
+
   STUDENT: {
     label: 'Student',
     initials: 'SR',
     name: 'Safwan Rahman',
     org: 'IUBAT22103125 · Group 07',
     nav: [
-      { section: 'My Thesis', items: [
+      { section: 'Overview', items: [
         { id: 'dashboard', icon: icons.homeIcon, label: 'Dashboard' },
+      ]},
+      { section: 'Thesis Activities', items: [
         { id: 'student_topic', icon: icons.topicIcon, label: 'Topic Submission' },
         { id: 'student_progress', icon: icons.progressIcon, label: 'Weekly Reports', badge: '2' },
-        { id: 'student_documents', icon: icons.docIcon, label: 'Documents' },
-        { id: 'student_meetings', icon: icons.meetingIcon, label: 'Meetings' },
-        { id: 'student_notice', icon: icons.evalIcon, label: 'Notices' },
-
+        { id: 'student_documents', icon: icons.docIcon, label: 'Thesis Documents' },
+        { id: 'student_meetings', icon: icons.meetingIcon, label: 'Supervision Meetings' },
+        { id: 'student_assignment', icon: icons.assignIcon, label: 'Assignments' },
       ]},
-      { section: 'Evaluation', items: [
-        { id: 'student_evaluation', icon: icons.evalIcon, label: 'Evaluation' },
-        { id: 'student_attendance', icon: icons.attendIcon, label: 'Attendance' },
-        { id: 'student_assignment', icon: icons.assignIcon, label: 'Assignment' },
+      
+      { section: 'Announcements', items: [
+        { id: 'student_notice', icon: icons.noticeIcon, label: 'Notices' },
       ]},
-    ]
+      { section: 'Academic Results', items: [
+        { id: 'student_evaluation', icon: icons.evalIcon, label: 'Marks & Grades' },
+      ]},
+      { section: 'Reports & Attendance', items: [
+        { id: 'attendance_report', icon: icons.reportIcon, label: 'Attendance Report' },
+      ]},
+    ],
   },
+
   SUPERVISOR: {
     label: 'Supervisor',
     initials: 'PM',
     name: 'Prof. Masud Parvez',
-    org: 'IUBAT · Supervisor',
+    org: 'IUBAT · Thesis Supervisor',
     nav: [
-      { section: 'Overview', items: [
+      { section: 'Dashboard & Evaluation', items: [
         { id: 'dashboard', icon: icons.homeIcon, label: 'Dashboard' },
+        { id: 'supervisor_ex_dashboard', icon: icons.homeIcon, label: 'Evaluation Dashboard' },
       ]},
-      { section: 'Supervision', items: [
+      { section: 'Thesis Supervision', items: [
         { id: 'supervisor_topics', icon: icons.topicIcon, label: 'Topic Review' },
-        { id: 'supervisor_reports', icon: icons.progressIcon, label: 'Weekly Reports', badge: '5' },
+        { id: 'supervisor_reports', icon: icons.progressIcon, label: 'Progress Reports', badge: '5' },
         { id: 'supervisor_docs', icon: icons.docIcon, label: 'Document Review' },
-        { id: 'supervisor_meetings', icon: icons.meetingIcon, label: 'Meetings' },
+        { id: 'supervisor_meetings', icon: icons.meetingIcon, label: 'Supervision Meetings' },
         { id: 'supervisor_assignments', icon: icons.assignIcon, label: 'Assignments' },
-        { id: 'supervisor_notice', icon: icons.evalIcon, label: 'Notices' },
-
       ]},
-      { section: 'Examination', items: [
-        { id: 'supervisor_ex_dashboard', icon: icons.homeIcon, label: 'Dashboard' },
-        { id: 'supervisor_ex_evaluate', icon: icons.evalIcon, label: 'Evaluate Thesis' },
+      { section: 'Thesis Examination', items: [
+        { id: 'supervisor_ex_evaluate', icon: icons.evalIcon, label: 'Thesis Evaluation' },
+        { id: 'supervisor_eval_edit', icon: icons.evalIcon, label: 'Evaluation Revisions' },
+        { id: 'supervisor_eval_request', icon: icons.evalIcon, label: 'Re-evaluation Requests' },
+      ]},
+      { section: 'Announcements', items: [
+        { id: 'supervisor_notice', icon: icons.noticeIcon, label: 'Notices' },
+      ]},
+      { section: 'Reports & Records', items: [
+        { id: 'attendance_report', icon: icons.reportIcon, label: 'Attendance Report' },
         { id: 'supervisor_ex_reports', icon: icons.reportIcon, label: 'Evaluation Reports' },
-        { id: 'supervisor_eval_request', icon: icons.evalIcon, label: 'Re-Evaluation Request' },
-        { id: 'supervisor_eval_edit', icon: icons.evalIcon, label: 'Edit Evaluation' },
       ]},
-    ]
+    ],
   },
+
   COORDINATOR: {
     label: 'Coordinator',
     initials: 'NK',
     name: 'Dr. Nasreen Karim',
-    org: 'IUBAT · Coordinator',
+    org: 'IUBAT · Thesis Coordinator',
     nav: [
-      { section: 'Overview', items: [
+      { section: 'Dashboard & Evaluation', items: [
         { id: 'dashboard', icon: icons.homeIcon, label: 'Dashboard' },
+        { id: 'coordinator_ex_dashboard', icon: icons.homeIcon, label: 'Evaluation Dashboard' },
       ]},
-      { section: 'Coordination', items: [
-        { id: 'coordinator_groups', icon: icons.groupIcon, label: 'All Groups' },
-        { id: 'coordinator_reports', icon: icons.progressIcon, label: 'Review Reports' },
-        { id: 'coordinator_ai', icon: icons.aiIcon, label: 'AI Summaries' },
-        { id: 'coordinator_examiners', icon: icons.userIcon, label: 'Assign Examiners' },
-        { id: 'coordinator_notice', icon: icons.evalIcon, label: 'Notices' },
-
+      { section: 'Thesis Coordination', items: [
+        // { id: 'coordinator_groups', icon: icons.groupIcon, label: 'Thesis Groups' },
+        { id: 'coordinator_reports', icon: icons.progressIcon, label: 'Progress Review' },
+        { id: 'coordinator_ai', icon: icons.aiIcon, label: 'AI-Powered Summaries' },
+        { id: 'coordinator_examiners', icon: icons.userIcon, label: 'Examiner Assignment' },
       ]},
-      { section: 'Examination', items: [
-        { id: 'coordinator_ex_dashboard', icon: icons.homeIcon, label: 'Dashboard' },
-        { id: 'coordinator_ex_evaluate', icon: icons.evalIcon, label: 'Evaluate Thesis' },
+      { section: 'Thesis Supervision', items: [
+        { id: 'supervisor_topics', icon: icons.topicIcon, label: 'Topic Review' },
+        { id: 'supervisor_reports', icon: icons.progressIcon, label: 'Progress Reports', badge: '5' },
+        { id: 'supervisor_docs', icon: icons.docIcon, label: 'Document Review' },
+        { id: 'supervisor_meetings', icon: icons.meetingIcon, label: 'Supervision Meetings' },
+        { id: 'supervisor_assignments', icon: icons.assignIcon, label: 'Assignments' },
+      ]},
+      { section: 'Monitoring', items: [
+        { id: 'topics', icon: icons.topicIcon, label: 'Topic Review' },
+        { id: 'progress', icon: icons.progressIcon, label: 'Progress Monitoring' },
+        { id: 'documents', icon: icons.docIcon, label: 'Thesis Documents' },
+      ]},
+      { section: 'Thesis Examination', items: [
+        { id: 'coordinator_ex_evaluate', icon: icons.evalIcon, label: 'Thesis Evaluation' },
+        { id: 'supervisor_eval_edit', icon: icons.evalIcon, label: 'Evaluation Revisions' },
+        { id: 'supervisor_eval_request', icon: icons.evalIcon, label: 'Re-evaluation Requests' },
+      ]},
+      { section: 'Announcements', items: [
+        { id: 'coordinator_notice', icon: icons.noticeIcon, label: 'Notices' },
+      ]},
+      { section: 'Reports & Records', items: [
         { id: 'coordinator_ex_reports', icon: icons.reportIcon, label: 'Evaluation Reports' },
       ]},
-    ]
+    ],
   },
+
   EXAMINER: {
     label: 'Examiner',
     initials: 'RH',
@@ -116,10 +145,10 @@ export const roles = {
     nav: [
       { section: 'Examination', items: [
         { id: 'dashboard', icon: icons.homeIcon, label: 'Dashboard' },
-        { id: 'examiner_evaluate', icon: icons.evalIcon, label: 'Evaluate Thesis' },
+        { id: 'examiner_evaluate', icon: icons.evalIcon, label: 'Thesis Evaluation' },
         { id: 'examiner_reports', icon: icons.reportIcon, label: 'Evaluation Reports' },
       ]},
-    ]
+    ],
   },
 };
 
@@ -131,5 +160,6 @@ export const getPageLabel = (roleKey, pageId) => {
     const foundItem = section.items.find((item) => item.id === pageId);
     if (foundItem) return foundItem.label;
   }
+
   return 'Dashboard';
 };

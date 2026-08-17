@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import '../style.css';
 
@@ -39,6 +39,11 @@ export default function CoordinatorGroups() {
   const [unassignedGroups, setUnassignedGroups] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Search & Pagination states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Modal specific states
   const [selectedBoard, setSelectedBoard] = useState(null);
   const [assignedBoardGroups, setAssignedBoardGroups] = useState([]);
@@ -68,6 +73,34 @@ export default function CoordinatorGroups() {
       setLoading(false);
     }
   };
+
+  // Filter boards based on search term
+  const filteredBoards = useMemo(() => {
+    return boards.filter((board) => {
+      const query = searchTerm.toLowerCase();
+      const boardIdStr = board.id ? board.id.toString().toLowerCase() : '';
+      const boardNameStr = (board.name || '').toLowerCase();
+      const semesterStr = (board.semesterName || '').toLowerCase();
+
+      return (
+        boardIdStr.includes(query) ||
+        boardNameStr.includes(query) ||
+        semesterStr.includes(query)
+      );
+    });
+  }, [boards, searchTerm]);
+
+  // Reset pagination to page 1 whenever search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Calculate slice range for current page
+  const totalEntries = filteredBoards.length;
+  const totalPages = Math.ceil(totalEntries / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalEntries);
+  const currentBoards = filteredBoards.slice(startIndex, endIndex);
 
   const handleOpenAssignModal = async (board) => {
     setSelectedBoard(board);
@@ -116,7 +149,6 @@ export default function CoordinatorGroups() {
 
       const newAssignment = res.data;
 
-      // 1. Update assigned groups inside modal
       setAssignedBoardGroups((prev) => [
         ...prev,
         {
@@ -126,7 +158,6 @@ export default function CoordinatorGroups() {
         }
       ]);
 
-      // 2. Remove group from unassigned dropdown list (1 group = 1 board constraint)
       setUnassignedGroups((prev) =>
         prev.filter((g) => g.groupId !== parsedGroupId)
       );
@@ -147,15 +178,12 @@ export default function CoordinatorGroups() {
       const config = getAuthConfig();
       await axios.delete(`/api/board/groups/${boardGroupId}`, config);
 
-      // Find the removed group details to put back into unassigned pool
       const removedItem = assignedBoardGroups.find((g) => g.boardGroupId === boardGroupId);
 
-      // 1. Remove from modal's current list
       setAssignedBoardGroups((prev) =>
         prev.filter((g) => g.boardGroupId !== boardGroupId)
       );
 
-      // 2. Put back into unassigned dropdown list
       if (removedItem) {
         setUnassignedGroups((prev) => [
           ...prev,
@@ -172,11 +200,22 @@ export default function CoordinatorGroups() {
     <div className="layout">
       <div className="main">
         <div className="content">
-          <div className="section-head" style={{ marginBottom: '20px' }}>
+          <div className="section-head" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div className="section-title" style={{ fontSize: '18px', fontWeight: 'bold' }}>
                 Assign Groups to Active Boards
               </div>
+            </div>
+            {/* Searchbar */}
+            <div className="search-box">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search board or semester..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ width: '250px', padding: '6px 12px' }}
+              />
             </div>
           </div>
 
@@ -194,8 +233,8 @@ export default function CoordinatorGroups() {
                   </tr>
                 </thead>
                 <tbody>
-                  {boards.length > 0 ? (
-                    boards.map((board) => (
+                  {currentBoards.length > 0 ? (
+                    currentBoards.map((board) => (
                       <tr key={board.id} style={{ borderBottom: '1px solid #eee' }}>
                         <td style={{ padding: '12px', fontWeight: 'bold' }}>#{board.id}</td>
                         <td style={{ padding: '12px' }}>{board.name || `Board #${board.id}`}</td>
@@ -214,12 +253,44 @@ export default function CoordinatorGroups() {
                   ) : (
                     <tr>
                       <td colSpan="4" style={{ textAlign: 'center', padding: '24px' }}>
-                        No active boards found.
+                        No matching active boards found.
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+
+              {/* Exact Pagination Bar from Boards.jsx */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between', // Fixed typo here (was 'justify')
+                  alignItems: 'center',
+                  marginTop: '16px',
+                  paddingTop: '12px',
+                  borderTop: '1px solid #eee'
+                }}
+              >
+                <div style={{ fontSize: '14px', color: '#666' }}>
+                  Showing {totalEntries > 0 ? startIndex + 1 : 0}–{endIndex} of {totalEntries} entries
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn-secondary btn-sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="btn-primary btn-sm"
+                    disabled={currentPage === totalPages || totalEntries === 0}
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -257,7 +328,7 @@ export default function CoordinatorGroups() {
                           key={g.boardGroupId}
                           style={{
                             display: 'flex',
-                            justifyContent: 'space-between',
+                            justify: 'space-between',
                             alignItems: 'center',
                             padding: '8px 12px',
                             backgroundColor: '#f8f9fa',

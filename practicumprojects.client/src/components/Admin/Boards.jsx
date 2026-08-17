@@ -24,7 +24,6 @@ const modalCardStyle = {
   boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
 };
 
-// Helper function to extract Auth headers from sessionStorage
 const getAuthConfig = () => {
   const token = sessionStorage.getItem('token');
   return {
@@ -42,7 +41,7 @@ export default function Boards() {
   const [selectedStatus, setSelectedStatus] = useState('ALL');
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingBoard, setEditingBoard] = useState(null);
@@ -72,10 +71,10 @@ export default function Boards() {
 
   const filteredBoards = useMemo(() => {
     return boards.filter((b) => {
+      const query = searchTerm.toLowerCase();
       const matchesSearch =
-        b.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.id?.toString().includes(searchTerm) ||
-        b.semesterName?.toLowerCase().includes(searchTerm.toLowerCase());
+        (b.name && b.name.toLowerCase().includes(query)) ||
+        (b.semesterName && b.semesterName.toLowerCase().includes(query));
 
       const isActive = b.isActive;
       const matchesStatus =
@@ -96,6 +95,9 @@ export default function Boards() {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredBoards.slice(start, start + itemsPerPage);
   }, [filteredBoards, currentPage, itemsPerPage]);
+
+  const startIndex = filteredBoards.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endIndex = Math.min(currentPage * itemsPerPage, filteredBoards.length);
 
   const handleToggleStatus = async (board) => {
     const newStatus = !board.isActive;
@@ -138,7 +140,7 @@ export default function Boards() {
         <input
           type="text"
           className="form-control"
-          placeholder="Search by board ID, name, or semester..."
+          placeholder="Search by board name or semester..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ flex: 1 }}
@@ -227,29 +229,29 @@ export default function Boards() {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
+      {/* Matching Groups.jsx Pagination Layout */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
+        <span style={{ fontSize: '14px', color: '#666' }}>
+          Showing {startIndex}-{endIndex} of {filteredBoards.length} boards
+        </span>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button
-            className="btn-secondary"
-            disabled={currentPage === 1}
+            className="btn-secondary btn-sm"
+            disabled={currentPage === 1 || loading}
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           >
             Previous
           </button>
-          <span style={{ alignSelf: 'center', fontSize: '14px' }}>
-            Page {currentPage} of {totalPages}
-          </span>
           <button
-            className="btn-secondary"
-            disabled={currentPage === totalPages}
+            className="btn-primary btn-sm"
+            disabled={currentPage >= totalPages || loading}
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           >
             Next
           </button>
         </div>
-      )}
+      </div>
 
-      {/* Unified Create Modal */}
       {isCreateOpen && (
         <CreateBoardModal
           semesters={semesters}
@@ -261,7 +263,6 @@ export default function Boards() {
         />
       )}
 
-      {/* Edit Modal */}
       {editingBoard && (
         <BoardEditModal
           board={editingBoard}
@@ -278,17 +279,9 @@ export default function Boards() {
 }
 
 function CreateBoardModal({ semesters, onClose, onSuccess }) {
-  const [tab, setTab] = useState('single'); // 'single' or 'bulk'
-  
-  // Single Creation State
-  const [formData, setFormData] = useState({
-    name: '',
-    semesterId: ''
-  });
-
-  // Bulk Upload State
+  const [tab, setTab] = useState('single');
+  const [formData, setFormData] = useState({ name: '', semesterId: '' });
   const [excelFile, setExcelFile] = useState(null);
-
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -303,9 +296,7 @@ function CreateBoardModal({ semesters, onClose, onSuccess }) {
         semesterId: formData.semesterId ? parseInt(formData.semesterId, 10) : null
       };
 
-      // Updated to point directly to /api/board/singleboardcreation
       const response = await axios.post('/api/board/singleboardcreation', payload, getAuthConfig());
-      
       onSuccess(response.data);
     } catch (err) {
       console.error(err);
@@ -350,7 +341,6 @@ function CreateBoardModal({ semesters, onClose, onSuccess }) {
       <div className="modal-card" style={modalCardStyle}>
         <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Create Board</h3>
 
-        {/* Tab Toggle */}
         <div style={{ display: 'flex', borderBottom: '1px solid #ddd', marginBottom: '20px' }}>
           <button
             type="button"

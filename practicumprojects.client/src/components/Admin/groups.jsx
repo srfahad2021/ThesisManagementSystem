@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '../style.css';
 
 export default function Groups() {
@@ -10,6 +10,10 @@ export default function Groups() {
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Modal Form State
   const [studentId1, setStudentId1] = useState('');
@@ -162,24 +166,42 @@ export default function Groups() {
   };
 
   // Filter groups based on search term
-  const filteredGroups = groups.filter((g) => {
-    const query = searchQuery.toLowerCase().trim();
-    if (!query) return true;
+  const filteredGroups = useMemo(() => {
+    return groups.filter((g) => {
+      const query = searchQuery.toLowerCase().trim();
+      if (!query) return true;
 
-    const groupName = (g.groupName || '').toLowerCase();
-    const student1 = (g.student1?.fullName || g.student1?.username || '').toLowerCase();
-    const student2 = (g.student2?.fullName || g.student2?.username || '').toLowerCase();
-    const supervisor = (g.supervisor?.fullName || g.supervisor?.username || '').toLowerCase();
-    const status = (g.status || '').toLowerCase();
+      const groupName = (g.groupName || '').toLowerCase();
+      const student1 = (g.student1?.fullName || g.student1?.username || '').toLowerCase();
+      const student2 = (g.student2?.fullName || g.student2?.username || '').toLowerCase();
+      const supervisor = (g.supervisor?.fullName || g.supervisor?.username || '').toLowerCase();
+      const status = (g.status || '').toLowerCase();
 
-    return (
-      groupName.includes(query) ||
-      student1.includes(query) ||
-      student2.includes(query) ||
-      supervisor.includes(query) ||
-      status.includes(query)
-    );
-  });
+      return (
+        groupName.includes(query) ||
+        student1.includes(query) ||
+        student2.includes(query) ||
+        supervisor.includes(query) ||
+        status.includes(query)
+      );
+    });
+  }, [groups, searchQuery]);
+
+  // Reset page index when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Pagination calculations
+  const totalGroups = filteredGroups.length;
+  const totalPages = Math.ceil(totalGroups / itemsPerPage) || 1;
+  const startIdx = totalGroups === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endIdx = Math.min(currentPage * itemsPerPage, totalGroups);
+
+  const paginatedGroups = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredGroups.slice(start, start + itemsPerPage);
+  }, [filteredGroups, currentPage, itemsPerPage]);
 
   return (
     <div className="layout">
@@ -189,7 +211,7 @@ export default function Groups() {
             <div>
               <div className="section-title" style={{ fontSize: '16px', fontWeight: 600 }}>Thesis Groups</div>
               <div className="text-muted text-sm">
-                {filteredGroups.length} of {groups.length} group(s) listed
+                Showing {startIdx}–{endIdx} of {totalGroups} group(s)
               </div>
             </div>
 
@@ -228,7 +250,7 @@ export default function Groups() {
                         Loading groups...
                       </td>
                     </tr>
-                  ) : filteredGroups.length === 0 ? (
+                  ) : paginatedGroups.length === 0 ? (
                     <tr>
                       <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
                         {searchQuery ? (
@@ -239,7 +261,7 @@ export default function Groups() {
                       </td>
                     </tr>
                   ) : (
-                    filteredGroups.map((g) => (
+                    paginatedGroups.map((g) => (
                       <tr key={g.groupId}>
                         <td><strong>{g.groupName}</strong></td>
                         <td>{formatMembers(g.student1, g.student2)}</td>
@@ -263,6 +285,29 @@ export default function Groups() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Pagination Controls */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+            <div className="text-muted text-sm">
+              Showing {startIdx}–{endIdx} of {totalGroups} groups
+            </div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                className="btn-secondary btn-sm"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <button
+                className="btn-primary btn-sm"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage >= totalPages}
+              >
+                Next
+              </button>
             </div>
           </div>
 
