@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '../style.css';
 import { NoticeCard } from '../NoticeComponents';
 
 const API_BASE = 'http://localhost:64580/api';
+const PAGE_SIZE = 10;
 
 export default function Student_notice() {
   const [notices, setNotices] = useState([]);
   const [typeFilter, setTypeFilter] = useState('ALL'); // ALL, PUBLIC, PRIVATE
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Search & Pagination States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const getAuthHeader = () => ({
     'Authorization': `Bearer ${sessionStorage.getItem('token')}`
@@ -17,6 +22,11 @@ export default function Student_notice() {
   useEffect(() => {
     fetchNotices();
   }, [typeFilter]);
+
+  // Reset pagination to page 1 on search or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, typeFilter]);
 
   const fetchNotices = async () => {
     setLoading(true);
@@ -52,6 +62,25 @@ export default function Student_notice() {
     }
   };
 
+  // Filter notices based on search input
+  const filteredNotices = useMemo(() => {
+    return notices.filter((notice) => {
+      const query = searchTerm.toLowerCase();
+      const titleMatch = notice.title?.toLowerCase().includes(query);
+      const contentMatch = notice.content?.toLowerCase().includes(query);
+      const authorMatch = notice.authorName?.toLowerCase().includes(query);
+      return titleMatch || contentMatch || authorMatch;
+    });
+  }, [notices, searchTerm]);
+
+  // Dynamic pagination calculation
+  const totalPages = Math.ceil(filteredNotices.length / PAGE_SIZE);
+
+  const paginatedNotices = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredNotices.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredNotices, currentPage]);
+
   return (
     <div className="layout">
       <div className="main">
@@ -74,21 +103,63 @@ export default function Student_notice() {
             </div>
           </div>
 
+          {/* Search Bar */}
+          <div style={{ marginBottom: '16px' }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search by title, content, or author..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ width: '300px', padding: '8px' }}
+            />
+          </div>
+
           {error && <div className="card" style={{ color: 'red', marginBottom: '16px' }}>{error}</div>}
 
           {loading ? (
             <div className="card"><p className="text-muted">Loading notices...</p></div>
-          ) : notices.length === 0 ? (
-            <div className="card"><p className="text-muted">No notices available.</p></div>
+          ) : paginatedNotices.length === 0 ? (
+            <div className="card">
+              <p className="text-muted">
+                {searchTerm ? 'No matching notices found.' : 'No notices available.'}
+              </p>
+            </div>
           ) : (
-            notices.map((notice) => (
-              <NoticeCard
-                key={notice.noticeId}
-                notice={notice}
-                userRole="STUDENT"
-                onDownloadAttachment={handleDownload}
-              />
-            ))
+            <>
+              {paginatedNotices.map((notice) => (
+                <NoticeCard
+                  key={notice.noticeId}
+                  notice={notice}
+                  userRole="STUDENT"
+                  onDownloadAttachment={handleDownload}
+                />
+              ))}
+
+              {/* Pagination & Footer Info */}
+              <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', marginTop: '16px' }}>
+                <span style={{ fontSize: '14px', color: '#6c757d' }}>
+                  Showing {((currentPage - 1) * PAGE_SIZE) + 1} to {Math.min(currentPage * PAGE_SIZE, filteredNotices.length)} of {filteredNotices.length} results
+                </span>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn-secondary btn-sm"
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="btn-primary btn-sm"
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

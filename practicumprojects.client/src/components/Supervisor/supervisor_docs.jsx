@@ -6,6 +6,10 @@ export default function SupervisorDocs() {
   const [loadingGroups, setLoadingGroups] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Group Documents Modal State
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupDocs, setGroupDocs] = useState([]);
@@ -68,6 +72,18 @@ export default function SupervisorDocs() {
       return groupNameMatches || memberMatches;
     });
   }, [groups, searchQuery]);
+
+  // Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Calculate pagination slice
+  const totalPages = Math.ceil(filteredGroups.length / itemsPerPage) || 1;
+  const paginatedGroups = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredGroups.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredGroups, currentPage, itemsPerPage]);
 
   // 2. Open Documents Modal & Fetch Group Documents
   const handleShowDocuments = async (group) => {
@@ -228,9 +244,6 @@ export default function SupervisorDocs() {
                     <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>
                       Supervisor
                     </th>
-                    {/* <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>
-                      Status
-                    </th> */}
                     <th style={{ padding: '12px 20px 12px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', textAlign: 'right' }}>
                       Actions
                     </th>
@@ -239,18 +252,18 @@ export default function SupervisorDocs() {
                 <tbody style={{ divideY: '1px solid #f3f4f6' }}>
                   {loadingGroups ? (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
+                      <td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
                         Loading assigned groups...
                       </td>
                     </tr>
                   ) : filteredGroups.length === 0 ? (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: '#6b7280' }}>
+                      <td colSpan="4" style={{ textAlign: 'center', padding: '32px', color: '#6b7280' }}>
                         {searchQuery ? 'No groups found matching your search.' : 'No groups assigned to you yet.'}
                       </td>
                     </tr>
                   ) : (
-                    filteredGroups.map((group) => {
+                    paginatedGroups.map((group) => {
                       const members = [
                         group.student1?.fullName || group.student1?.username,
                         group.student2?.fullName || group.student2?.username,
@@ -272,9 +285,6 @@ export default function SupervisorDocs() {
                           <td style={{ padding: '12px 16px', verticalAlign: 'middle', color: '#4b5563', fontSize: '13px' }}>
                             {supervisorName}
                           </td>
-                          {/* <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                            <span className="badge badge-neutral">{group.status}</span>
-                          </td> */}
                           <td style={{ padding: '12px 20px 12px 16px', verticalAlign: 'middle', textAlign: 'right' }}>
                             <button
                               className="btn-primary btn-sm"
@@ -290,6 +300,46 @@ export default function SupervisorDocs() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Navigation Bar */}
+            {!loadingGroups && filteredGroups.length > 0 && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '12px 20px',
+                borderTop: '1px solid #e5e7eb',
+                backgroundColor: '#ffffff'
+              }}>
+                <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                  Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredGroups.length)} of  {filteredGroups.length} groups
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <button
+                    className="btn-secondary btn-sm"
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    // style={{  cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                  >
+                    Previous
+                  </button>
+
+                  <span style={{ fontSize: '13px', color: '#374151', padding: '0 6px' }}>
+                    Page {currentPage} of {totalPages}
+                  </span>
+
+                  <button
+                    className="btn-primary btn-sm"
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    // style={{ opacity: currentPage === totalPages ? 0.5 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Group Documents Modal */}

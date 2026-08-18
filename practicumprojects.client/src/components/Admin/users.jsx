@@ -21,7 +21,7 @@ export default function Users() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 7;
+  const pageSize = 10;
 
   // Helper to fetch authorization token safely
   const getAuthToken = () => sessionStorage.getItem('token') || '';
@@ -413,7 +413,7 @@ export default function Users() {
                                 onClick={() => handleResetPassword(u)}
                                 title="Reset Password"
                               >
-                                Reset
+                                Reset Password
                               </button>
                               <button
                                 className={`btn-secondary btn-sm`}

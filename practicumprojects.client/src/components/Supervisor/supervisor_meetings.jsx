@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '../style.css';
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const PAGE_SIZE = 10;
 
 const getStoredUser = () => {
   const userStr = sessionStorage.getItem('user');
@@ -34,6 +35,10 @@ export default function SupervisorMeetings() {
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Search & Pagination States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Modals
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -56,6 +61,11 @@ export default function SupervisorMeetings() {
       fetchData();
     }
   }, [currentUserId]);
+
+  // Reset to first page when changing tab or typing in search bar
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchQuery]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -146,8 +156,32 @@ export default function SupervisorMeetings() {
     setShowViewSummaryModal(true);
   };
 
-  const pendingMeetings = meetings.filter(m => m.status === 'PENDING');
-  const approvedMeetings = meetings.filter(m => m.status === 'APPROVED' || m.status === 'COMPLETED');
+  // Base datasets split by tab
+  const pendingMeetings = useMemo(() => meetings.filter(m => m.status === 'PENDING'), [meetings]);
+  const approvedMeetings = useMemo(() => meetings.filter(m => m.status === 'APPROVED' || m.status === 'COMPLETED'), [meetings]);
+
+  // Filter dataset by search term (Group name, Requester, Title, Agenda, Date, Medium)
+  const filteredMeetings = useMemo(() => {
+    const activeList = activeTab === 'requests' ? pendingMeetings : approvedMeetings;
+    if (!searchQuery.trim()) return activeList;
+
+    const query = searchQuery.toLowerCase();
+    return activeList.filter(m => 
+      m.groupName?.toLowerCase().includes(query) ||
+      m.requestedBy?.toLowerCase().includes(query) ||
+      m.title?.toLowerCase().includes(query) ||
+      m.agenda?.toLowerCase().includes(query) ||
+      m.meetingDate?.toLowerCase().includes(query) ||
+      m.medium?.toLowerCase().includes(query)
+    );
+  }, [activeTab, pendingMeetings, approvedMeetings, searchQuery]);
+
+  // Calculate pagination boundaries
+  const totalPages = Math.ceil(filteredMeetings.length / PAGE_SIZE) || 1;
+  const paginatedMeetings = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredMeetings.slice(start, start + PAGE_SIZE);
+  }, [filteredMeetings, currentPage]);
 
   return (
     <div className="layout">
@@ -165,95 +199,147 @@ export default function SupervisorMeetings() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '15px', borderBottom: '2px solid #e2e8f0', marginBottom: '20px' }}>
-            <button
-              onClick={() => setActiveTab('requests')}
-              style={{
-                padding: '10px 15px', border: 'none', background: 'none', cursor: 'pointer',
-                fontWeight: activeTab === 'requests' ? 'bold' : 'normal',
-                borderBottom: activeTab === 'requests' ? '3px solid #2563eb' : 'none',
-                color: activeTab === 'requests' ? '#2563eb' : '#64748b'
-              }}
-            >
-              Meeting Requests ({pendingMeetings.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('approved')}
-              style={{
-                padding: '10px 15px', border: 'none', background: 'none', cursor: 'pointer',
-                fontWeight: activeTab === 'approved' ? 'bold' : 'normal',
-                borderBottom: activeTab === 'approved' ? '3px solid #2563eb' : 'none',
-                color: activeTab === 'approved' ? '#2563eb' : '#64748b'
-              }}
-            >
-              Approved Meetings ({approvedMeetings.length})
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e2e8f0', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              <button
+                onClick={() => setActiveTab('requests')}
+                style={{
+                  padding: '10px 15px', border: 'none', background: 'none', cursor: 'pointer',
+                  fontWeight: activeTab === 'requests' ? 'bold' : 'normal',
+                  borderBottom: activeTab === 'requests' ? '3px solid var(--primary)' : 'none',
+                  color: activeTab === 'requests' ? 'var(--primary)' : '#64748b'
+                }}
+              >
+                Meeting Requests ({pendingMeetings.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('approved')}
+                style={{
+                  padding: '10px 15px', border: 'none', background: 'none', cursor: 'pointer',
+                  fontWeight: activeTab === 'approved' ? 'bold' : 'normal',
+                  borderBottom: activeTab === 'approved' ? '3px solid var(--primary)' : 'none',
+                  color: activeTab === 'approved' ? 'var(--primary)' : '#64748b'
+                }}
+              >
+                Approved Meetings ({approvedMeetings.length})
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div style={{ paddingBottom: '6px' }}>
+              <input 
+                type="text" 
+                placeholder="Search meetings..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '13px',
+                  outline: 'none',
+                  width: '220px'
+                }}
+              />
+            </div>
           </div>
 
           {loading ? (
             <div>Loading meetings...</div>
           ) : (
-            <div className="card">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Group / Student</th>
-                    <th>Requested Date & Time</th>
-                    <th>Medium</th>
-                    <th>Title & Agenda</th>
-                    <th>Status</th>
-                    {activeTab === 'approved' ? <th>Student Summary</th> : <th>Actions</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(activeTab === 'requests' ? pendingMeetings : approvedMeetings).length === 0 ? (
+            <>
+              <div className="card">
+                <table className="data-table">
+                  <thead>
                     <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>
-                        No {activeTab === 'requests' ? 'pending requests' : 'approved meetings'} found.
-                      </td>
+                      <th>Group / Student</th>
+                      <th>Requested Date & Time</th>
+                      <th>Medium</th>
+                      <th>Title & Agenda</th>
+                      <th>Status</th>
+                      {activeTab === 'approved' ? <th>Student Summary</th> : <th>Actions</th>}
                     </tr>
-                  ) : (
-                    (activeTab === 'requests' ? pendingMeetings : approvedMeetings).map(m => (
-                      <tr key={m.meetingId}>
-                        <td>
-                          <strong>{m.groupName}</strong>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>By: {m.requestedBy || 'N/A'}</div>
-                        </td>
-                        <td>{m.meetingDate}<br /><span style={{ fontSize: '12px', color: '#475569' }}>{m.startTime} - {m.endTime}</span></td>
-                        <td><span className={`badge ${m.medium === 'Online' ? 'badge-info' : 'badge-secondary'}`}>{m.medium}</span></td>
-                        <td>
-                          <strong>{m.title}</strong>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>{m.agenda}</div>
-                        </td>
-                        <td><span className="badge badge-warning">{m.status}</span></td>
-                        <td>
-                          {activeTab === 'requests' ? (
-                            <div style={{ display: 'flex', gap: '6px' }}>
-                              <button onClick={() => handleUpdateStatus(m.meetingId, 'APPROVED')} className="btn-primary" style={{ padding: '4px 10px', fontSize: '12px', cursor: 'pointer' }}>Approve</button>
-                              <button onClick={() => { setSelectedMeetingId(m.meetingId); setShowRejectionModal(true); }} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '12px', cursor: 'pointer' }}>Reject</button>
-                            </div>
-                          ) : (
-                            <div>
-                              {m.summary ? (
-                                <button 
-                                  onClick={() => handleOpenViewSummaryModal(m.summary)} 
-                                  className="btn-secondary" 
-                                  style={{ padding: '4px 10px', fontSize: '12px', cursor: 'pointer' }}
-                                >
-                                  Show Summary
-                                </button>
-                              ) : (
-                                <span style={{ fontSize: '12px', color: '#94a3b8' }}>No summary submitted yet</span>
-                              )}
-                            </div>
-                          )}
+                  </thead>
+                  <tbody>
+                    {paginatedMeetings.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>
+                          {searchQuery ? 'No matching meetings found.' : `No ${activeTab === 'requests' ? 'pending requests' : 'approved meetings'} found.`}
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    ) : (
+                      paginatedMeetings.map(m => (
+                        <tr key={m.meetingId}>
+                          <td>
+                            <strong>{m.groupName}</strong>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>By: {m.requestedBy || 'N/A'}</div>
+                          </td>
+                          <td>{m.meetingDate}<br /><span style={{ fontSize: '12px', color: '#475569' }}>{m.startTime} - {m.endTime}</span></td>
+                          <td><span className={`badge ${m.medium === 'Online' ? 'badge-info' : 'badge-secondary'}`}>{m.medium}</span></td>
+                          <td>
+                            <strong>{m.title}</strong>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>{m.agenda}</div>
+                          </td>
+                          <td><span className="badge badge-warning">{m.status}</span></td>
+                          <td>
+                            {activeTab === 'requests' ? (
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <button onClick={() => handleUpdateStatus(m.meetingId, 'APPROVED')} className="btn-primary" style={{ padding: '4px 10px', fontSize: '12px', cursor: 'pointer' }}>Approve</button>
+                                <button onClick={() => { setSelectedMeetingId(m.meetingId); setShowRejectionModal(true); }} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '12px', cursor: 'pointer' }}>Reject</button>
+                              </div>
+                            ) : (
+                              <div>
+                                {m.summary ? (
+                                  <button 
+                                    onClick={() => handleOpenViewSummaryModal(m.summary)} 
+                                    className="btn-secondary" 
+                                    style={{ padding: '4px 10px', fontSize: '12px', cursor: 'pointer' }}
+                                  >
+                                    Show Summary
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>No summary submitted yet</span>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination Controls */}
+              {filteredMeetings.length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px' }}>
+                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                    Showing {((currentPage - 1) * PAGE_SIZE) + 1} to {Math.min(currentPage * PAGE_SIZE, filteredMeetings.length)} of {filteredMeetings.length} results
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button 
+                      className="btn-secondary btn-sm" 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      // style={{ padding: '6px 12px', fontSize: '12px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.6 : 1 }}
+                    >
+                      Previous
+                    </button>
+                    <span style={{ fontSize: '13px', color: '#334155' }}>
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button 
+                      className="btn-primary btn-sm" 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      // style={{ padding: '6px 12px', fontSize: '12px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.6 : 1 }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

@@ -16,7 +16,7 @@ export default function Admin_notice() {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Adjust items per page as needed
+  const itemsPerPage = 10; // Adjust items per page as needed
 
   const getAuthHeader = () => ({
     'Authorization': `Bearer ${sessionStorage.getItem('token')}`

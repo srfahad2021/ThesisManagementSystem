@@ -280,7 +280,7 @@ export default function StudentProgress() {
               {!activeReport
                 ? `+ Submit Week ${selectedWeek}`
                 : canEditActiveReport
-                ? `✏️ Resubmit Week ${selectedWeek}`
+                ? `Resubmit Week ${selectedWeek}`
                 : `Week ${selectedWeek} Submitted`}
             </button>
           </div>
@@ -360,7 +360,7 @@ export default function StudentProgress() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {activeReport.files.map((file) => (
                         <div key={file.fileId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}>
-                          <span>📄 {file.fileName} <span className="text-muted" style={{ fontSize: '11px' }}>({(file.fileSize / 1024).toFixed(1)} KB)</span></span>
+                          <span>{file.fileName} <span className="text-muted" style={{ fontSize: '11px' }}>({(file.fileSize / 1024).toFixed(1)} KB)</span></span>
                           <a href={`/api/WeeklyReports/download-file/${file.fileId}`} download style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>
                             Download
                           </a>
@@ -451,13 +451,14 @@ export default function StudentProgress() {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {existingFiles.map((f) => (
                           <div key={f.fileId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F3F4F6', padding: '6px 10px', borderRadius: 'var(--radius-sm)', fontSize: '12px' }}>
-                            <span>📄 {f.fileName}</span>
+                            <span>{f.fileName}</span>
                             <button
                               type="button"
+                              className='btn-primary btn-sm'
                               onClick={() => handleDeleteExistingFile(f.fileId)}
-                              style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
+                              // style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
                             >
-                              🗑️ Delete
+                              Delete
                             </button>
                           </div>
                         ))}

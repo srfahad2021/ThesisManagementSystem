@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '../style.css';
 import { icons } from '../../Information/Icons.jsx';
+
+const PAGE_SIZE = 10;
 
 export default function SupervisorAssignments() {
   const [assignments, setAssignments] = useState([]);
@@ -9,13 +11,17 @@ export default function SupervisorAssignments() {
   const [showModal, setShowModal] = useState(false);
   const [editingAssignmentId, setEditingAssignmentId] = useState(null);
 
+  // Search & Pagination States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Form states
   const [selectedGroupId, setSelectedGroupId] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
   const [existingFiles, setExistingFiles] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState([]); // Changed to an array for easier manipulation
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   const getAuthToken = () => {
@@ -26,6 +32,11 @@ export default function SupervisorAssignments() {
     fetchAssignments();
     fetchSupervisedGroups();
   }, []);
+
+  // Reset pagination to page 1 whenever search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const fetchAssignments = async () => {
     try {
@@ -105,9 +116,7 @@ export default function SupervisorAssignments() {
 
   const handleFileSelectionChange = (e) => {
     const chosenFiles = Array.from(e.target.files);
-    // Append newly chosen files to the existing array of selected files
     setSelectedFiles(prev => [...prev, ...chosenFiles]);
-    // Reset file input value so selecting the same file again triggers change if needed
     e.target.value = null;
   };
 
@@ -150,7 +159,6 @@ export default function SupervisorAssignments() {
     formData.append('description', description);
     formData.append('deadline', new Date(deadline).toISOString());
     
-    // Append files from state array
     if (selectedFiles && selectedFiles.length > 0) {
       for (let i = 0; i < selectedFiles.length; i++) {
         formData.append('files', selectedFiles[i]);
@@ -203,17 +211,48 @@ export default function SupervisorAssignments() {
     }
   };
 
+  // Filtered Assignments calculation based on Search Query
+  const filteredAssignments = useMemo(() => {
+    return assignments.filter((item) => {
+      const query = searchTerm.toLowerCase();
+      const titleMatch = item.title?.toLowerCase().includes(query);
+      const groupMatch = item.groupName?.toLowerCase().includes(query);
+      return titleMatch || groupMatch;
+    });
+  }, [assignments, searchTerm]);
+
+  // Total pages calculation
+  const totalPages = Math.ceil(filteredAssignments.length / PAGE_SIZE);
+
+  // Current page sliced items
+  const paginatedAssignments = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredAssignments.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredAssignments, currentPage]);
+
   return (
     <div className="layout">
       <div className="main">
         <div className="content">
-          <div className="section-head" style={{ marginBottom: '20px' }}>
+          <div className="section-head" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div className="section-title" style={{ fontSize: '16px' }}>Assignments</div>
             </div>
             <button className="btn-primary" onClick={handleOpenCreateModal}>
               + Create Assignment
             </button>
+          </div>
+
+          {/* Search Bar */}
+          <div style={{ marginBottom: '16px' }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search by title or group name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ width: '300px', padding: '8px' }}
+            />
           </div>
 
           <div className="card">
@@ -233,12 +272,14 @@ export default function SupervisorAssignments() {
                   <tr>
                     <td colSpan="6" style={{ textAlign: 'center' }}>Loading assignments...</td>
                   </tr>
-                ) : assignments.length === 0 ? (
+                ) : paginatedAssignments.length === 0 ? (
                   <tr>
-                    <td colSpan="6" style={{ textAlign: 'center' }}>No assignments created yet.</td>
+                    <td colSpan="6" style={{ textAlign: 'center' }}>
+                      {searchTerm ? 'No matching assignments found.' : 'No assignments created yet.'}
+                    </td>
                   </tr>
                 ) : (
-                  assignments.map((item) => (
+                  paginatedAssignments.map((item) => (
                     <tr key={item.assignmentId}>
                       <td><strong>{item.title}</strong></td>
                       <td>{item.groupName}</td>
@@ -270,6 +311,32 @@ export default function SupervisorAssignments() {
                 )}
               </tbody>
             </table>
+
+            {/* Pagination & Status Footer */}
+            {!loading && filteredAssignments.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
+                <span style={{ fontSize: '14px', color: '#6c757d' }}>
+                  Showing {((currentPage - 1) * PAGE_SIZE) + 1}-{Math.min(currentPage * PAGE_SIZE, filteredAssignments.length)} of {filteredAssignments.length} Assignemnts
+                </span>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn-secondary btn-sm"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="btn-primary btn-sm"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Modal Popup for Create / Edit Assignment */}
@@ -336,7 +403,7 @@ export default function SupervisorAssignments() {
                     />
                   </div>
 
-                  {/* Display Previously Uploaded Files During Edit */}
+                  {/* Existing Files List */}
                   {editingAssignmentId && existingFiles.length > 0 && (
                     <div>
                       <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Existing Attachments</label>
@@ -359,7 +426,7 @@ export default function SupervisorAssignments() {
                     </div>
                   )}
 
-                  {/* Display Newly Selected Files Queue with Remove Option */}
+                  {/* Newly Selected Files */}
                   {selectedFiles.length > 0 && (
                     <div>
                       <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Selected Files to Upload</label>

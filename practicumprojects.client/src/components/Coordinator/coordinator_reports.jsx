@@ -5,6 +5,11 @@ export default function CoordinatorReports() {
   const [groups, setGroups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Search & Pagination State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Modal State
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupReports, setGroupReports] = useState([]); // Holds reports needing coordinator review
@@ -44,6 +49,25 @@ export default function CoordinatorReports() {
   useEffect(() => {
     fetchCoordinatorGroups();
   }, []);
+
+  // Filter groups based on search term
+  const filteredGroups = groups.filter((g) => {
+    const groupName = g.groupName || `Group #${g.groupId}`;
+    return groupName.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  // Calculate pagination variables
+  const totalEntries = filteredGroups.length;
+  const totalPages = Math.ceil(totalEntries / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalEntries);
+  const paginatedGroups = filteredGroups.slice(startIndex, endIndex);
+
+  // Reset to page 1 whenever search query changes
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   // 2. Open Modal for a Group
   const handleOpenGroupDetails = async (group) => {
@@ -161,7 +185,7 @@ export default function CoordinatorReports() {
     <div className="layout">
       <div className="main">
         <div className="content">
-          <div className="section-head" style={{ marginBottom: '20px' }}>
+          <div className="section-head" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div className="section-title" style={{ fontSize: '18px', fontWeight: 600 }}>
                 Coordinator Report Reviews
@@ -170,55 +194,106 @@ export default function CoordinatorReports() {
                 Review, give final approvals, or request revisions for supervisor-accepted weekly reports across all groups.
               </div>
             </div>
+
+            {/* Search Input Bar */}
+            <div style={{ minWidth: '240px' }}>
+              <input
+                type="text"
+                placeholder="Search by group name..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border)',
+                  fontSize: '13px',
+                }}
+              />
+            </div>
           </div>
 
           {/* Groups Summary Table */}
           <div className="card">
-            {groups.length === 0 ? (
+            {filteredGroups.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px 16px' }} className="text-muted">
-                No groups or submitted reports awaiting coordinator review.
+                {searchTerm ? 'No groups match your search criteria.' : 'No groups or submitted reports awaiting coordinator review.'}
               </div>
             ) : (
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Group Name</th>
-                    <th>Pending Reviews</th>
-                    <th>Total Submitted Weeks</th>
-                    <th>Last Submitted Date</th>
-                    <th style={{ textAlign: 'right' }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {groups.map((g) => (
-                    <tr key={g.groupId}>
-                      <td style={{ fontWeight: 600 }}>{g.groupName || `Group #${g.groupId}`}</td>
-                      <td>
-                        {g.pendingCount > 0 ? (
-                          <span className="badge badge-warning" style={{ padding: '4px 8px', borderRadius: '12px' }}>
-                            {g.pendingCount} Pending Approval
-                          </span>
-                        ) : (
-                          <span className="badge badge-success" style={{ padding: '4px 8px', borderRadius: '12px' }}>
-                            All Reviewed
-                          </span>
-                        )}
-                      </td>
-                      <td>{g.submittedCount || 0} Week(s)</td>
-                      <td>{g.lastSubmittedAt ? new Date(g.lastSubmittedAt).toLocaleDateString() : 'N/A'}</td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          className="btn-primary"
-                          style={{ padding: '6px 14px', fontSize: '13px' }}
-                          onClick={() => handleOpenGroupDetails(g)}
-                        >
-                          View Reports
-                        </button>
-                      </td>
+              <>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Group Name</th>
+                      <th>Pending Reviews</th>
+                      <th>Total Submitted Weeks</th>
+                      <th>Last Submitted Date</th>
+                      <th style={{ textAlign: 'right' }}>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paginatedGroups.map((g) => (
+                      <tr key={g.groupId}>
+                        <td style={{ fontWeight: 600 }}>{g.groupName || `Group #${g.groupId}`}</td>
+                        <td>
+                          {g.pendingCount > 0 ? (
+                            <span className="badge badge-warning" style={{ padding: '4px 8px', borderRadius: '12px' }}>
+                              {g.pendingCount} Pending Approval
+                            </span>
+                          ) : (
+                            <span className="badge badge-success" style={{ padding: '4px 8px', borderRadius: '12px' }}>
+                              All Reviewed
+                            </span>
+                          )}
+                        </td>
+                        <td>{g.submittedCount || 0} Week(s)</td>
+                        <td>{g.lastSubmittedAt ? new Date(g.lastSubmittedAt).toLocaleDateString() : 'N/A'}</td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            className="btn-primary"
+                            style={{ padding: '6px 14px', fontSize: '13px' }}
+                            onClick={() => handleOpenGroupDetails(g)}
+                          >
+                            View Reports
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Pagination Controls */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '16px',
+                    paddingTop: '12px',
+                    borderTop: '1px solid #eee'
+                  }}
+                >
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    Showing {totalEntries > 0 ? startIndex + 1 : 0}–{endIndex} of {totalEntries} entries
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="btn-secondary btn-sm"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      className="btn-primary btn-sm"
+                      disabled={currentPage === totalPages || totalEntries === 0}
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 

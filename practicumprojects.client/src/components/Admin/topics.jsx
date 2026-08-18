@@ -77,7 +77,7 @@ export default function Topics() {
   const [activeTab, setActiveTab] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   // Modal states
   const [selectedTopic, setSelectedTopic] = useState(null);

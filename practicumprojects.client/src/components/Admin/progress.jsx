@@ -213,7 +213,7 @@ export default function GroupProgressView() {
                         </td>
                         <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                           <button
-                            className="btn-secondary btn-sm"
+                            className="btn-primary btn-sm"
                             onClick={() => handleOpenViewModal(group)}
                             style={{ cursor: 'pointer', padding: '6px 14px' }}
                           >

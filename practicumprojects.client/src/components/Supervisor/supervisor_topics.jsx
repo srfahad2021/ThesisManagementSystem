@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../style.css';
 
-// Reusable TopicCard function/component updated with action handlers
+// Reusable TopicCard component with structured two-line layout and explicit labels
 export function TopicCard({ topic, onApprove, onRequestRevision, onReject, onViewFull }) {
   const { title, student, keywords, status } = topic;
 
@@ -15,22 +15,64 @@ export function TopicCard({ topic, onApprove, onRequestRevision, onReject, onVie
   const keywordList = keywords ? keywords.split(',') : [];
 
   return (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px', marginBottom: '12px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>{title || 'Untitled Topic'}</div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{student}</div>
+    <div 
+      style={{ 
+        border: '1px solid var(--border)', 
+        borderRadius: 'var(--radius)', 
+        padding: '12px 16px', 
+        marginBottom: '10px',
+        backgroundColor: '#fff',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '16px'
+      }}
+    >
+      {/* Left Content Area - Structured into 2 distinct lines */}
+      <div style={{ flex: '1 1 auto', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        
+        {/* Line 1: Topic Title and Group Name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Topic:</span>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={title}>
+              "{title || 'Untitled Topic'}"
+            </span>
+          </div>
+
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+            <span style={{ fontWeight: 500 }}>Group:</span>
+            <span style={{ color: '#374151', fontWeight: 600 }}>{student}</span>
+          </div>
         </div>
-        <span className={`badge ${sc}`}>{status}</span>
+
+        {/* Line 2: Status & Keywords */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500 }}>Status:</span>
+            <span className={`badge ${sc}`}>{status}</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, overflow: 'hidden' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500, flexShrink: 0 }}>Keywords:</span>
+            {keywordList.length > 0 ? (
+              <div className="tag-cloud" style={{ margin: 0, display: 'flex', flexWrap: 'nowrap', overflow: 'hidden', gap: '4px' }}>
+                {keywordList.map((k, i) => (
+                  <span key={i} className="tag" style={{ whiteSpace: 'nowrap', fontSize: '11px', padding: '2px 8px' }}>
+                    {k.trim()}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span style={{ fontSize: '12px', color: '#9ca3af', fontStyle: 'italic' }}>None</span>
+            )}
+          </div>
+        </div>
+
       </div>
 
-      <div className="tag-cloud" style={{ marginBottom: '12px' }}>
-        {keywordList.map((k, i) => (
-          <span key={i} className="tag">{k.trim()}</span>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: '8px' }}>
+      {/* Right Action Buttons */}
+      <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center' }}>
         <button className="btn-primary btn-sm" onClick={() => onApprove(topic)}>Approve</button>
         <button className="btn-secondary btn-sm" onClick={() => onRequestRevision(topic)}>Request Revision</button>
         <button className="btn-secondary btn-sm" onClick={() => onReject(topic)}>Reject</button>
@@ -50,6 +92,11 @@ export default function SupervisorTopics() {
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState(null);
 
+  // Search & Pagination states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   useEffect(() => {
     fetchSupervisorTopics();
   }, []);
@@ -66,6 +113,7 @@ export default function SupervisorTopics() {
       if (response.ok) {
         const data = await response.json();
         setSubmissions(data);
+        setCurrentPage(1);
       } else {
         setMessage({ type: 'error', text: 'Failed to load assigned topic submissions.' });
       }
@@ -100,33 +148,32 @@ export default function SupervisorTopics() {
   };
 
   const handleDownloadFile = async (fileId, fileName) => {
-  try {
-    const token = sessionStorage.getItem('token');
-    const headers = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    try {
+      const token = sessionStorage.getItem('token');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    // Updated URL to match [HttpGet("download/{id:int}")]
-    const response = await fetch(`/api/SubmissionFile/download/${fileId}`, { headers });
+      const response = await fetch(`/api/SubmissionFile/download/${fileId}`, { headers });
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => null);
-      throw new Error(err?.message || `Download failed with status ${response.status}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => null);
+        throw new Error(err?.message || `Download failed with status ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName || `file-${fileId}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(`Failed to download file: ${error.message}`);
     }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName || `file-${fileId}`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Download error:', error);
-    alert(`Failed to download file: ${error.message}`);
-  }
-};
+  };
 
   const handleOpenModal = (topic, initialFeedback = '') => {
     setSelectedTopic(topic);
@@ -186,6 +233,28 @@ export default function SupervisorTopics() {
     handleStatusUpdate(topic.topicId, 'REJECTED', topic.supervisorFeedback || '');
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // Filter topics by title, group ID, or keywords
+  const filteredSubmissions = submissions.filter((topic) => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    const titleMatch = topic.title ? topic.title.toLowerCase().includes(q) : false;
+    const groupMatch = topic.groupId ? `group #${topic.groupId}`.toLowerCase().includes(q) : false;
+    const keywordsMatch = topic.keywords ? topic.keywords.toLowerCase().includes(q) : false;
+    return titleMatch || groupMatch || keywordsMatch;
+  });
+
+  // Pagination calculation values
+  const totalEntries = filteredSubmissions.length;
+  const totalPages = Math.ceil(totalEntries / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalEntries);
+  const currentSubmissions = filteredSubmissions.slice(startIndex, endIndex);
+
   if (loading) {
     return (
       <div className="layout">
@@ -208,30 +277,67 @@ export default function SupervisorTopics() {
             </div>
           )}
 
-          <div className="section-head" style={{ marginBottom: '20px' }}>
+          <div className="section-head" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div className="section-title" style={{ fontSize: '16px' }}>Topic Review</div>
+              <div className="section-title" style={{ fontSize: '18px' }}>Topic Review</div>
+              <div className="text-muted text-sm">Review, approve, or request revisions for student topic submissions.</div>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search title, group, keywords..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                style={{ width: '260px' }}
+              />
             </div>
           </div>
 
-          {submissions.length === 0 ? (
+          {totalEntries === 0 ? (
             <div className="card">
-              <p style={{ margin: 0, color: 'var(--text-secondary)' }}>No submitted topics pending your review.</p>
+              <p style={{ margin: 0, color: 'var(--text-secondary)' }}>No topic submissions found.</p>
             </div>
           ) : (
-            submissions.map((topic) => (
-              <TopicCard
-                key={topic.topicId}
-                topic={{
-                  ...topic,
-                  student: `Group #${topic.groupId}`
-                }}
-                onApprove={handleApproveQuick}
-                onRequestRevision={handleRequestRevisionQuick}
-                onReject={handleRejectQuick}
-                onViewFull={handleOpenModal}
-              />
-            ))
+            <>
+              {currentSubmissions.map((topic) => (
+                <TopicCard
+                  key={topic.topicId}
+                  topic={{
+                    ...topic,
+                    student: `Group #${topic.groupId}`
+                  }}
+                  onApprove={handleApproveQuick}
+                  onRequestRevision={handleRequestRevisionQuick}
+                  onReject={handleRejectQuick}
+                  onViewFull={handleOpenModal}
+                />
+              ))}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  Showing {totalEntries > 0 ? startIndex + 1 : 0}–{endIndex} of {totalEntries} entries
+                </span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn-secondary btn-sm"
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    style={{ opacity: 1, cursor: 'pointer' }}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="btn-primary btn-sm"
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages || totalEntries === 0}
+                    style={{ opacity: 1, cursor: 'pointer' }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Full Page Review Modal */}

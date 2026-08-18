@@ -10,7 +10,7 @@ export default function AllGroupsList() {
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   // Modal State for Group Documents
   const [selectedGroup, setSelectedGroup] = useState(null);

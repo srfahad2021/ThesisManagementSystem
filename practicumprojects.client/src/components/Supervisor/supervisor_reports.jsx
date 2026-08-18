@@ -5,6 +5,11 @@ export default function SupervisorReports() {
   const [groups, setGroups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Search & Pagination State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   // Modal State
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupReports, setGroupReports] = useState([]); // Holds reports needing review
@@ -44,6 +49,25 @@ export default function SupervisorReports() {
   useEffect(() => {
     fetchSupervisorGroups();
   }, []);
+
+  // Filter groups according to search input
+  const filteredGroups = groups.filter((g) => {
+    const name = (g.groupName || `Group #${g.groupId}`).toLowerCase();
+    return name.includes(searchTerm.toLowerCase());
+  });
+
+  // Calculate pagination parameters
+  const totalEntries = filteredGroups.length;
+  const totalPages = Math.ceil(totalEntries / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalEntries);
+  const paginatedGroups = filteredGroups.slice(startIndex, endIndex);
+
+  // Handle Search Input Change
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page on search
+  };
 
   // 2. Open Modal for a Group
   const handleOpenGroupDetails = async (group) => {
@@ -165,53 +189,98 @@ export default function SupervisorReports() {
             </div>
           </div>
 
-          {/* Groups Summary Table */}
+          {/* Search Controls */}
+          <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-start' }}>
+            <input
+              type="text"
+              placeholder="Search by group name..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              style={{
+                padding: '8px 12px',
+                width: '100%',
+                maxWidth: '320px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border)',
+                fontSize: '13px',
+              }}
+            />
+          </div>
+
+          {/* Groups Summary Table Card */}
           <div className="card">
-            {groups.length === 0 ? (
+            {filteredGroups.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px 16px' }} className="text-muted">
-                No assigned groups or submitted reports found.
+                {searchTerm ? "No matching groups found." : "No assigned groups or submitted reports found."}
               </div>
             ) : (
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Group Name</th>
-                    <th>Pending Reviews</th>
-                    <th>Total Submitted Weeks</th>
-                    <th>Last Submitted Date</th>
-                    <th style={{ textAlign: 'right' }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {groups.map((g) => (
-                    <tr key={g.groupId}>
-                      <td style={{ fontWeight: 600 }}>{g.groupName || `Group #${g.groupId}`}</td>
-                      <td>
-                        {g.pendingCount > 0 ? (
-                          <span className="badge badge-warning" style={{ padding: '4px 8px', borderRadius: '12px' }}>
-                            {g.pendingCount} Pending
-                          </span>
-                        ) : (
-                          <span className="badge badge-success" style={{ padding: '4px 8px', borderRadius: '12px' }}>
-                            All Reviewed
-                          </span>
-                        )}
-                      </td>
-                      <td>{g.submittedCount || 0} Week(s)</td>
-                      <td>{g.lastSubmittedAt ? new Date(g.lastSubmittedAt).toLocaleDateString() : 'N/A'}</td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          className="btn-primary"
-                          style={{ padding: '6px 14px', fontSize: '13px' }}
-                          onClick={() => handleOpenGroupDetails(g)}
-                        >
-                          View Reports
-                        </button>
-                      </td>
+              <>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Group Name</th>
+                      <th>Pending Reviews</th>
+                      <th>Total Submitted Weeks</th>
+                      <th>Last Submitted Date</th>
+                      <th style={{ textAlign: 'right' }}>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paginatedGroups.map((g) => (
+                      <tr key={g.groupId}>
+                        <td style={{ fontWeight: 600 }}>{g.groupName || `Group #${g.groupId}`}</td>
+                        <td>
+                          {g.pendingCount > 0 ? (
+                            <span className="badge badge-warning" style={{ padding: '4px 8px', borderRadius: '12px' }}>
+                              {g.pendingCount} Pending
+                            </span>
+                          ) : (
+                            <span className="badge badge-success" style={{ padding: '4px 8px', borderRadius: '12px' }}>
+                              All Reviewed
+                            </span>
+                          )}
+                        </td>
+                        <td>{g.submittedCount || 0} Week(s)</td>
+                        <td>{g.lastSubmittedAt ? new Date(g.lastSubmittedAt).toLocaleDateString() : 'N/A'}</td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            className="btn-primary"
+                            style={{ padding: '6px 14px', fontSize: '13px' }}
+                            onClick={() => handleOpenGroupDetails(g)}
+                          >
+                            View Reports
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Pagination Toolbar */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                    Showing {totalEntries > 0 ? startIndex + 1 : 0}–{endIndex} of {totalEntries} entries
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="btn-secondary btn-sm"
+                      onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                      disabled={currentPage === 1}
+                      style={{ opacity: 1, cursor: 'pointer' }}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      className="btn-primary btn-sm"
+                      onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                      disabled={currentPage === totalPages || totalEntries === 0}
+                      style={{ opacity: 1, cursor: 'pointer' }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 

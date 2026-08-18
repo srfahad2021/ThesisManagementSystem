@@ -43,6 +43,11 @@ export default function CoordinatorExaminers() {
   const [modalError, setModalError] = useState('');
   const [assigning, setAssigning] = useState(false);
 
+  // Search & Pagination State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -64,6 +69,25 @@ export default function CoordinatorExaminers() {
       setLoading(false);
     }
   };
+
+  // Reset pagination to page 1 whenever search query changes
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // Filter boards based on board name / group name
+  const filteredBoards = boards.filter((board) => {
+    const boardName = board.name || `Board #${board.id}`;
+    return boardName.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  // Pagination Calculations
+  const totalEntries = filteredBoards.length;
+  const totalPages = Math.ceil(totalEntries / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalEntries);
+  const paginatedBoards = filteredBoards.slice(startIndex, endIndex);
 
   const handleOpenAssignModal = (board) => {
     setSelectedBoard(board);
@@ -150,11 +174,38 @@ export default function CoordinatorExaminers() {
     <div className="layout">
       <div className="main">
         <div className="content">
-          <div className="section-head" style={{ marginBottom: '20px' }}>
+          <div
+            className="section-head"
+            style={{
+              marginBottom: '20px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}
+          >
             <div>
               <div className="section-title" style={{ fontSize: '18px', fontWeight: 'bold' }}>
                 Assign Examiners to Active Boards
               </div>
+            </div>
+
+            {/* SEARCH BAR */}
+            <div>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search by group / board name..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                  minWidth: '250px'
+                }}
+              />
             </div>
           </div>
 
@@ -173,8 +224,8 @@ export default function CoordinatorExaminers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {boards.length > 0 ? (
-                    boards.map((board) => (
+                  {paginatedBoards.length > 0 ? (
+                    paginatedBoards.map((board) => (
                       <tr key={board.id} style={{ borderBottom: '1px solid #eee' }}>
                         <td style={{ padding: '12px', fontWeight: 'bold' }}>#{board.id}</td>
                         <td style={{ padding: '12px' }}>{board.name || `Board #${board.id}`}</td>
@@ -199,7 +250,7 @@ export default function CoordinatorExaminers() {
                               ))}
                             </div>
                           ) : (
-                            <span style={{ color: '#888', italic: 'true' }}>— Unassigned —</span>
+                            <span style={{ color: '#888', fontStyle: 'italic' }}>— Unassigned —</span>
                           )}
                         </td>
                         <td style={{ padding: '12px', textAlign: 'right' }}>
@@ -222,6 +273,38 @@ export default function CoordinatorExaminers() {
                   )}
                 </tbody>
               </table>
+
+              {/* PAGINATION CONTROLS */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: '16px',
+                  paddingTop: '12px',
+                  borderTop: '1px solid #eee'
+                }}
+              >
+                <div style={{ fontSize: '14px', color: '#666' }}>
+                  Showing {totalEntries > 0 ? startIndex + 1 : 0}–{endIndex} of {totalEntries} entries
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn-secondary btn-sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="btn-primary btn-sm"
+                    disabled={currentPage === totalPages || totalEntries === 0}
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

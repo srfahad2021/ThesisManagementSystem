@@ -12,7 +12,7 @@ export const roles = {
         { id: 'analytics', icon: icons.chartIcon, label: 'Academic Analytics' },
       ]},
       { section: 'Administration', items: [
-        { id: 'users', icon: icons.userIcon, label: 'User Accounts', badge: '3' },
+        { id: 'users', icon: icons.userIcon, label: 'User Accounts'},
         { id: 'groups', icon: icons.groupIcon, label: 'Thesis Groups' },
         { id: 'semesters', icon: icons.calIcon, label: 'Semesters' },
         { id: 'boards', icon: icons.boardIcon, label: 'Examination Boards' },
@@ -26,7 +26,13 @@ export const roles = {
       ]},
       
       { section: 'Reports & Records', items: [
-        { id: 'reports', icon: icons.reportIcon, label: 'Reports & Exports' },
+        // { id: 'reports', icon: icons.reportIcon, label: 'Reports & Exports' },
+        { id: 'student_progress_report', icon: icons.reportIcon, label: 'Student Progress Report' },
+        { id: 'supervisor_activity_reprot', icon: icons.reportIcon, label: 'Superviosr Activity Report' },
+        { id: 'department_summary', icon: icons.reportIcon, label: 'Department Summary' },
+        { id: 'attendance_reprot', icon: icons.reportIcon, label: 'Attendance Reprot' },
+        { id: 'evaluation_report', icon: icons.reportIcon, label: 'Evaluation Reprot' },
+        { id: 'coordinator_summary', icon: icons.reportIcon, label: 'Coordinator Summary' },
       ]},
       { section: 'Announcements', items: [
         { id: 'admin_notice', icon: icons.noticeIcon, label: 'Notices' },
@@ -45,7 +51,7 @@ export const roles = {
       ]},
       { section: 'Thesis Activities', items: [
         { id: 'student_topic', icon: icons.topicIcon, label: 'Topic Submission' },
-        { id: 'student_progress', icon: icons.progressIcon, label: 'Weekly Reports', badge: '2' },
+        { id: 'student_progress', icon: icons.progressIcon, label: 'Weekly Reports'},
         { id: 'student_documents', icon: icons.docIcon, label: 'Thesis Documents' },
         { id: 'student_meetings', icon: icons.meetingIcon, label: 'Supervision Meetings' },
         { id: 'student_assignment', icon: icons.assignIcon, label: 'Assignments' },
@@ -75,7 +81,7 @@ export const roles = {
       ]},
       { section: 'Thesis Supervision', items: [
         { id: 'supervisor_topics', icon: icons.topicIcon, label: 'Topic Review' },
-        { id: 'supervisor_reports', icon: icons.progressIcon, label: 'Progress Reports', badge: '5' },
+        { id: 'supervisor_reports', icon: icons.progressIcon, label: 'Progress Reports'},
         { id: 'supervisor_docs', icon: icons.docIcon, label: 'Document Review' },
         { id: 'supervisor_meetings', icon: icons.meetingIcon, label: 'Supervision Meetings' },
         { id: 'supervisor_assignments', icon: icons.assignIcon, label: 'Assignments' },
@@ -97,9 +103,7 @@ export const roles = {
 
   COORDINATOR: {
     label: 'Coordinator',
-    initials: 'NK',
-    name: 'Dr. Nasreen Karim',
-    org: 'IUBAT · Thesis Coordinator',
+    initials: 'CD',
     nav: [
       { section: 'Dashboard & Evaluation', items: [
         { id: 'dashboard', icon: icons.homeIcon, label: 'Dashboard' },
@@ -113,7 +117,7 @@ export const roles = {
       ]},
       { section: 'Thesis Supervision', items: [
         { id: 'supervisor_topics', icon: icons.topicIcon, label: 'Topic Review' },
-        { id: 'supervisor_reports', icon: icons.progressIcon, label: 'Progress Reports', badge: '5' },
+        { id: 'supervisor_reports', icon: icons.progressIcon, label: 'Progress Reports'},
         { id: 'supervisor_docs', icon: icons.docIcon, label: 'Document Review' },
         { id: 'supervisor_meetings', icon: icons.meetingIcon, label: 'Supervision Meetings' },
         { id: 'supervisor_assignments', icon: icons.assignIcon, label: 'Assignments' },

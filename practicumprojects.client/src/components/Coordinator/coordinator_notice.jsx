@@ -9,10 +9,15 @@ export default function Coordinator_notice() {
   const [assignableGroups, setAssignableGroups] = useState([]);
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [selectedGroupId, setSelectedGroupId] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNotice, setEditingNotice] = useState(null);
   const [error, setError] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Adjust items per page as needed
 
   const getAuthHeader = () => ({
     'Authorization': `Bearer ${sessionStorage.getItem('token')}`
@@ -31,6 +36,7 @@ export default function Coordinator_notice() {
       });
       if (!res.ok) throw new Error('Failed to load notices.');
       setNotices(await res.json());
+      setCurrentPage(1); // Reset to first page on filter change/data reload
     } catch (err) {
       setError(err.message);
     } finally {
@@ -94,6 +100,27 @@ export default function Coordinator_notice() {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // Filter notices by title or text content
+  const filteredNotices = notices.filter((n) => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    const titleMatch = n.title ? n.title.toLowerCase().includes(query) : false;
+    const textMatch = n.bodyText ? n.bodyText.toLowerCase().includes(query) : false;
+    return titleMatch || textMatch;
+  });
+
+  // Pagination calculation values
+  const totalEntries = filteredNotices.length;
+  const totalPages = Math.ceil(totalEntries / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalEntries);
+  const currentNotices = filteredNotices.slice(startIndex, endIndex);
+
   return (
     <div className="layout">
       <div className="main">
@@ -103,8 +130,17 @@ export default function Coordinator_notice() {
               <div className="section-title" style={{ fontSize: '18px' }}>Coordinator Notice Board</div>
               <div className="text-muted text-sm">Manage public announcements and private group communications.</div>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <select className="form-control" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search title or text..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                style={{ width: '200px' }}
+              />
+
+              <select className="form-control" style={{width: '200px'}} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
                 <option value="ALL">All Types</option>
                 <option value="PUBLIC">Public Only</option>
                 <option value="PRIVATE">Private Only</option>
@@ -114,6 +150,7 @@ export default function Coordinator_notice() {
                 className="form-control"
                 value={selectedGroupId}
                 onChange={(e) => setSelectedGroupId(parseInt(e.target.value, 10))}
+                style={{width: '200px'}}
               >
                 <option value={0}>All Groups Filter</option>
                 {assignableGroups.map((g) => (
@@ -121,7 +158,7 @@ export default function Coordinator_notice() {
                 ))}
               </select>
 
-              <button className="btn-primary" onClick={() => { setEditingNotice(null); setIsModalOpen(true); }}>
+              <button className="btn-primary" style={{ width: '200px' }} onClick={() => { setEditingNotice(null); setIsModalOpen(true); }}>
                 + Create Notice
               </button>
             </div>
@@ -131,19 +168,45 @@ export default function Coordinator_notice() {
 
           {loading ? (
             <div className="card"><p className="text-muted">Loading notices...</p></div>
-          ) : notices.length === 0 ? (
+          ) : totalEntries === 0 ? (
             <div className="card"><p className="text-muted">No notices found.</p></div>
           ) : (
-            notices.map((n) => (
-              <NoticeCard
-                key={n.noticeId}
-                notice={n}
-                userRole="COORDINATOR"
-                onEdit={(notice) => { setEditingNotice(notice); setIsModalOpen(true); }}
-                onDelete={handleDeleteNotice}
-                onDownloadAttachment={handleDownload}
-              />
-            ))
+            <>
+              {currentNotices.map((n) => (
+                <NoticeCard
+                  key={n.noticeId}
+                  notice={n}
+                  userRole="COORDINATOR"
+                  onEdit={(notice) => { setEditingNotice(notice); setIsModalOpen(true); }}
+                  onDelete={handleDeleteNotice}
+                  onDownloadAttachment={handleDownload}
+                />
+              ))}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  Showing {totalEntries > 0 ? startIndex + 1 : 0}–{endIndex} of {totalEntries} entries
+                </span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn-secondary btn-sm"
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    style={{ opacity: 1, cursor: 'pointer' }}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="btn-primary btn-sm"
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages || totalEntries === 0}
+                    style={{ opacity: 1, cursor: 'pointer' }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </>
           )}
 
           <NoticeModal
