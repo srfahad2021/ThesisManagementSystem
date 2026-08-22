@@ -122,21 +122,6 @@
           "build/Microsoft.AspNetCore.OpenApi.targets": {}
         }
       },
-      "Microsoft.AspNetCore.SpaProxy/10.0.11": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0/Microsoft.AspNetCore.SpaProxy.dll": {}
-        },
-        "runtime": {
-          "lib/net10.0/Microsoft.AspNetCore.SpaProxy.dll": {}
-        },
-        "frameworkReferences": [
-          "Microsoft.AspNetCore.App"
-        ],
-        "build": {
-          "build/Microsoft.AspNetCore.SpaProxy.targets": {}
-        }
-      },
       "Microsoft.Bcl.AsyncInterfaces/7.0.0": {
         "type": "package",
         "compile": {
@@ -1193,21 +1178,6 @@
         "lib/net10.0/Microsoft.AspNetCore.OpenApi.xml",
         "microsoft.aspnetcore.openapi.10.0.10.nupkg.sha512",
         "microsoft.aspnetcore.openapi.nuspec"
-      ]
-    },
-    "Microsoft.AspNetCore.SpaProxy/10.0.11": {
-      "sha512": "bu1oRqZVuvBXTXFMciLm57Gledjv6Y8veHmXtayLOjkoHm/2hNd35dZOA9hko6VQhmbQuPIQQNerbpJHyibzVw==",
-      "type": "package",
-      "path": "microsoft.aspnetcore.spaproxy/10.0.11",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "THIRD-PARTY-NOTICES.TXT",
-        "build/Microsoft.AspNetCore.SpaProxy.targets",
-        "lib/net10.0/Microsoft.AspNetCore.SpaProxy.dll",
-        "microsoft.aspnetcore.spaproxy.10.0.11.nupkg.sha512",
-        "microsoft.aspnetcore.spaproxy.nuspec"
       ]
     },
     "Microsoft.Bcl.AsyncInterfaces/7.0.0": {
@@ -3003,7 +2973,6 @@
       "ExcelDataReader.DataSet >= 3.9.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.10",
       "Microsoft.AspNetCore.OpenApi >= 10.0.10",
-      "Microsoft.AspNetCore.SpaProxy >= 10.*-*",
       "Microsoft.EntityFrameworkCore >= 9.0.0",
       "Microsoft.EntityFrameworkCore.Design >= 9.0.0",
       "Microsoft.EntityFrameworkCore.Relational >= 9.0.0",
@@ -3018,11 +2987,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
+      "projectUniqueName": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
       "projectName": "PracticumProjects.Server",
-      "projectPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
+      "projectPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\PracticumProjects.Server.csproj",
       "packagesPath": "C:\\Users\\srfah\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\obj\\",
+      "outputPath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\PracticumProjects.Server\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3086,10 +3055,6 @@
           "Microsoft.AspNetCore.OpenApi": {
             "target": "Package",
             "version": "[10.0.10, )"
-          },
-          "Microsoft.AspNetCore.SpaProxy": {
-            "target": "Package",
-            "version": "[10.*-*, )"
           },
           "Microsoft.EntityFrameworkCore": {
             "target": "Package",

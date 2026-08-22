@@ -14,7 +14,7 @@ public static class DbInitializer
         {
             var adminUser = new User
             {
-                Username = "admin",
+                Username = "Admin",
                 // Hash default admin password using BCrypt
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123456"),
                 Role = UserRole.ADMIN,
@@ -26,41 +26,6 @@ public static class DbInitializer
             };
 
             context.Users.Add(adminUser);
-            await context.SaveChangesAsync();
-        }
-        if (!context.Users.Any(u => u.Role == UserRole.STUDENT))
-        {
-            var studentUser = new User
-            {
-                Username = "student1",
-                // Hash default admin password using BCrypt
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("student@123456"),
-                Role = UserRole.STUDENT,
-                Email = "student@portal.com",
-                FirstName = "first",
-                LastName = "student",
-                IsProfileCompleted = true,
-                CreatedAt = DateTime.UtcNow
-            };
-            context.Users.Add(studentUser);
-            await context.SaveChangesAsync();
-        }
-
-        if (!context.Users.Any(u => u.Role == UserRole.STUDENT))
-        {
-            var studentUser = new User
-            {
-                Username = "student1",
-                // Hash default admin password using BCrypt
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("student@123456"),
-                Role = UserRole.STUDENT,
-                Email = "student@portal.com",
-                FirstName = "first",
-                LastName = "student",
-                IsProfileCompleted = true,
-                CreatedAt = DateTime.UtcNow
-            };
-            context.Users.Add(studentUser);
             await context.SaveChangesAsync();
         }
     }
