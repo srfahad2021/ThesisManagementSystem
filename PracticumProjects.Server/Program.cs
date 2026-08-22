@@ -2,19 +2,21 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using PracticumProjects.Server.Data;
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-{
-    Args = args
-});
+var builder = WebApplication.CreateSlimBuilder(args);
 
 // =========================================================
 // CONFIGURATION
 // =========================================================
-// Disable configuration file watching.
-// Render has a limited inotify instance limit.
+//
+// CreateSlimBuilder is used instead of CreateBuilder because
+// Render has a low Linux inotify limit.
+//
+// We explicitly configure JSON files with
+// reloadOnChange: false.
 // =========================================================
 
 builder.Configuration.Sources.Clear();
@@ -134,12 +136,6 @@ builder.Services.AddOpenApi();
 // =========================================================
 // CORS
 // =========================================================
-// Frontend:
-// https://thesis-management-system-one.vercel.app
-//
-// Backend:
-// https://thesismanagementsystem-6opj.onrender.com
-// =========================================================
 
 builder.Services.AddCors(options =>
 {
@@ -161,7 +157,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // =========================================================
-// DEVELOPMENT
+// DEVELOPMENT OPENAPI / SPA
 // =========================================================
 
 if (app.Environment.IsDevelopment())
@@ -173,24 +169,14 @@ if (app.Environment.IsDevelopment())
 }
 
 // =========================================================
-// MIDDLEWARE
+// CORS
 // =========================================================
-
-// IMPORTANT:
-// CORS must run before Authentication/Authorization.
 
 app.UseCors("AllowFrontend");
 
 // =========================================================
 // HTTPS
 // =========================================================
-
-// Render already provides HTTPS at the public URL.
-// Keep this enabled if your Render ASP.NET setup correctly
-// handles forwarded HTTPS headers.
-//
-// If you continue getting redirect-related CORS errors,
-// temporarily disable this middleware.
 
 app.UseHttpsRedirection();
 
