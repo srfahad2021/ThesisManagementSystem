@@ -246,7 +246,14 @@ export default function CoordinatorReports() {
                             </span>
                           )}
                         </td>
-                        <td>{g.submittedCount || 0} Week(s)</td>
+                        <td>
+                          <div className="progress" style={{ width: '60%'}}>
+                            <div className="progress-bar" style={{ width: `${(g.submittedCount * 100 / 36)}%` }} />
+                            10%
+                          </div>
+                          {((g.submittedCount * 100) / 36).toFixed(2)}%
+                        </td>
+                        {/* <td>{g.submittedCount || 0} Week(s)</td> */}
                         <td>{g.lastSubmittedAt ? new Date(g.lastSubmittedAt).toLocaleDateString() : 'N/A'}</td>
                         <td style={{ textAlign: 'right' }}>
                           <button

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "dxBEpqLfzTA=",
+  "dgSpecHash": "s4T3HizGIrc=",
   "success": true,
   "projectFilePath": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\PracticumProjects.Server.csproj",
   "expectedPackageFiles": [
@@ -40,6 +40,7 @@
     "C:\\Users\\srfah\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\mysqlconnector\\2.4.0\\mysqlconnector.2.4.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\pomelo.entityframeworkcore.mysql\\9.0.0\\pomelo.entityframeworkcore.mysql.9.0.0.nupkg.sha512",
+    "C:\\Users\\srfah\\.nuget\\packages\\questpdf\\2026.7.3\\questpdf.2026.7.3.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512",
     "C:\\Users\\srfah\\.nuget\\packages\\system.composition\\7.0.0\\system.composition.7.0.0.nupkg.sha512",

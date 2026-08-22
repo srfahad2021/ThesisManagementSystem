@@ -60,6 +60,10 @@
               "target": "Package",
               "version": "[8.6.3, )"
             },
+            "ExcelDataReader": {
+              "target": "Package",
+              "version": "[3.9.0, )"
+            },
             "ExcelDataReader.DataSet": {
               "target": "Package",
               "version": "[3.9.0, )"
@@ -93,6 +97,10 @@
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
               "version": "[9.0.0, )"
+            },
+            "QuestPDF": {
+              "target": "Package",
+              "version": "[2026.7.3, )"
             }
           },
           "imports": [

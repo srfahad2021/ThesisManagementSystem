@@ -258,7 +258,8 @@ public class TopicSubmissionController : ControllerBase
         // Validate editable status workflow
         var isEditable = submission.Status == TopicStatus.INITIAL ||
                          submission.Status == TopicStatus.DRAFT ||
-                         submission.Status == TopicStatus.NEEDS_REVISION;
+                         submission.Status == TopicStatus.NEEDS_REVISION ||
+                         submission.Status == TopicStatus.REJECTED;
 
         if (!isEditable)
         {

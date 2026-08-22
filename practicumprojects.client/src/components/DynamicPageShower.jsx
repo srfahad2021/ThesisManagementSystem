@@ -16,6 +16,7 @@ import Boards from './Admin/Boards.jsx';
 import GroupsAssign from './Admin/group_assign_board.jsx'
 import Admin_eval_request from './Admin/admin_eval_request.jsx';
 import Admin_notice from './Admin/admin_notice.jsx'
+import Student_progress_reprot from './Admin/student_progress_report.jsx'
 
 import Coordinator_ai from './Coordinator/coordinator_ai.jsx';
 import Coordinator_dashboard from './Coordinator/coordinator_dashboard.jsx';
@@ -25,7 +26,7 @@ import Coordinator_reports from './Coordinator/coordinator_reports.jsx';
 import Coordinator_ex_dashboard from './Coordinator/coordinator_ex_dashboard.jsx';
 import Coordinator_ex_evaluate from './Coordinator/coordinator_ex_evaluate.jsx';
 import Coordinator_ex_reports from './Coordinator/coordinator_ex_reports.jsx';
-import Coordinator_notice from './Coordinator/Coordinator_notice.jsx';
+import Coordinator_notice from './Coordinator/coordinator_notice.jsx';
 
 import Examiner_dashboard from './Examiner/examiner_dashboard.jsx';
 import Examiner_evaluate from './Examiner/examiner_evaluate.jsx';
@@ -95,6 +96,8 @@ export default function DynamicPageShower({ user, currentPage }) {
                     return <Admin_eval_request user={user}/>;
                 case 'admin_notice':
                     return <Admin_notice user={user}/>;
+                case 'student_progress_report':
+                    return <Student_progress_reprot user={user}/>;
 
                 default:
                     return (

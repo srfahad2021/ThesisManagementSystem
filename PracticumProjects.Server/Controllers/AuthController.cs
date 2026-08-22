@@ -2,6 +2,7 @@ using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Net.Mail;
 using System.Text.Json.Serialization;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
@@ -89,54 +90,8 @@ public class AuthController : ControllerBase
         });
     }
 
-    // ----------------------------------------------------
-    // POST: /api/auth/create-user (ADMIN ONLY)
-    // ----------------------------------------------------
-    [HttpPost("create-user")]
-    [Authorize(Roles = "ADMIN")]
-    public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest dto)
-    {
-        if (string.IsNullOrWhiteSpace(dto.Username))
-        {
-            return BadRequest(new { message = "Username is required." });
-        }
-
-        if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
-        {
-            return BadRequest(new { message = $"Username '{dto.Username}' already exists." });
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.Email) && await _context.Users.AnyAsync(u => u.Email == dto.Email))
-        {
-            return BadRequest(new { message = $"Email '{dto.Email}' is already in use." });
-        }
-
-        // Set default password if none provided (e.g. Username@123)
-        string passwordToUse = string.IsNullOrWhiteSpace(dto.Password) ? $"{dto.Username}@123" : dto.Password;
-        UserRole roleToUse = dto.Role ?? UserRole.STUDENT;
-
-        var newUser = new User
-        {
-            Username = dto.Username,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(passwordToUse),
-            Role = roleToUse,
-            Email = string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email,
-            FirstName = string.IsNullOrWhiteSpace(dto.FirstName) ? null : dto.FirstName,
-            LastName = string.IsNullOrWhiteSpace(dto.LastName) ? null : dto.LastName,
-            PhoneNumber = string.IsNullOrWhiteSpace(dto.PhoneNumber) ? null : dto.PhoneNumber,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _context.Users.Add(newUser);
-        await _context.SaveChangesAsync();
-
-        return Ok(new { message = "User created successfully.", userId = newUser.UserId });
-    }
-
-    // ----------------------------------------------------
-    // POST: /api/auth/bulk-create (ADMIN ONLY)
-    // ----------------------------------------------------
+    
+    // POST: /api/auth/bulk-create
     [HttpPost("bulk-create")]
     [Authorize(Roles = "ADMIN")]
     public async Task<IActionResult> BulkCreateUser([FromForm] IFormFile file)
@@ -144,105 +99,261 @@ public class AuthController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest(new { message = "No file uploaded." });
 
-        var allowedExtensions = new[] { ".csv", ".xls", ".xlsx", ".xlsm" };
-        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var allowed = new[] { ".csv", ".xls", ".xlsx", ".xlsm" };
 
-        if (!allowedExtensions.Contains(fileExtension))
-            return BadRequest(new { message = "Unsupported file format. Please upload CSV or Excel files." });
+        if (!allowed.Contains(ext))
+            return BadRequest(new { message = "Please upload CSV or Excel files." });
 
-        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
-        var existingUsernames = new HashSet<string>(await _context.Users.Select(u => u.Username.ToLower()).ToListAsync());
-        var existingEmails = new HashSet<string>(await _context.Users.Where(u => u.Email != null).Select(u => u.Email!.ToLower()).ToListAsync());
-
-        var usersToCreate = new List<User>();
-        var errors = new List<string>();
-
-        using (var stream = file.OpenReadStream())
+        try
         {
-            using (var reader = ExcelReaderFactory.CreateReader(stream))
+            System.Text.Encoding.RegisterProvider(
+                System.Text.CodePagesEncodingProvider.Instance);
+
+            var existingUsernames = new HashSet<string>(
+                await _context.Users
+                    .Select(x => x.Username.ToLower())
+                    .ToListAsync());
+
+            var existingEmails = new HashSet<string>(
+                await _context.Users
+                    .Where(x => x.Email != null)
+                    .Select(x => x.Email!.ToLower())
+                    .ToListAsync());
+
+            var importedUsernames = new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase);
+
+            var importedEmails = new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase);
+
+            var users = new List<User>();
+            var errors = new List<string>();
+
+            using var stream = file.OpenReadStream();
+
+            using var reader = ext == ".csv"
+                ? ExcelReaderFactory.CreateCsvReader(stream)
+                : ExcelReaderFactory.CreateReader(stream);
+
+            var dataSet = reader.AsDataSet(new ExcelDataSetConfiguration
             {
-                var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                ConfigureDataTable = _ => new ExcelDataTableConfiguration
                 {
-                    ConfigureDataTable = (_) => new ExcelDataTableConfiguration() { UseHeaderRow = true }
+                    UseHeaderRow = true
+                }
+            });
+
+            if (dataSet.Tables.Count == 0)
+                return BadRequest(new { message = "The file contains no readable sheets." });
+
+            var table = dataSet.Tables[0];
+
+            if (table.Columns.Count == 0)
+                return BadRequest(new { message = "The file contains no columns." });
+
+            var columns = table.Columns
+                .Cast<DataColumn>()
+                .Select(x => x.ColumnName.Trim())
+                .ToList();
+
+            string? FindColumn(string name) =>
+                columns.FirstOrDefault(x =>
+                    x.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            var usernameCol = FindColumn("Username");
+
+            if (usernameCol == null)
+            {
+                return BadRequest(new
+                {
+                    message = "The file must contain a 'Username' column.",
+                    availableColumns = columns
                 });
+            }
 
-                var table = result.Tables[0];
-                int rowIndex = 1;
+            var emailCol = FindColumn("Email");
+            var fullNameCol = FindColumn("FullName");
+            var roleCol = FindColumn("Role");
+            var passwordCol = FindColumn("Password");
 
-                foreach (DataRow row in table.Rows)
+            int rowNumber = 2;
+
+            foreach (DataRow row in table.Rows)
+            {
+                try
                 {
-                    rowIndex++;
-                    string username = row["Username"]?.ToString()?.Trim() ?? string.Empty;
+                    var username = Cell(row, usernameCol);
 
                     if (string.IsNullOrWhiteSpace(username))
                     {
-                        continue; // Skip empty rows
-                    }
-
-                    if (existingUsernames.Contains(username.ToLower()) || usersToCreate.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        errors.Add($"Row {rowIndex}: Username '{username}' already exists.");
+                        rowNumber++;
                         continue;
                     }
 
-                    string email = row.Table.Columns.Contains("Email") ? row["Email"]?.ToString()?.Trim() ?? "" : "";
+                    username = username.Trim();
+
+                    if (existingUsernames.Contains(username.ToLower()) ||
+                        !importedUsernames.Add(username))
+                    {
+                        errors.Add(
+                            $"Row {rowNumber}: Username '{username}' already exists or is duplicated.");
+                        rowNumber++;
+                        continue;
+                    }
+
+                    var email = emailCol == null ? "" : Cell(row, emailCol);
+
                     if (!string.IsNullOrWhiteSpace(email))
                     {
-                        if (existingEmails.Contains(email.ToLower()) || usersToCreate.Any(u => email.Equals(u.Email, StringComparison.OrdinalIgnoreCase)))
+                        email = email.Trim();
+
+                        if (!IsValidEmail(email))
                         {
-                            errors.Add($"Row {rowIndex}: Email '{email}' is already in use.");
+                            errors.Add(
+                                $"Row {rowNumber}: Invalid email '{email}'.");
+                            importedUsernames.Remove(username);
+                            rowNumber++;
+                            continue;
+                        }
+
+                        if (existingEmails.Contains(email.ToLower()) ||
+                            !importedEmails.Add(email))
+                        {
+                            errors.Add(
+                                $"Row {rowNumber}: Email '{email}' already exists or is duplicated.");
+                            importedUsernames.Remove(username);
+                            rowNumber++;
                             continue;
                         }
                     }
 
-                    string fullName = row.Table.Columns.Contains("FullName") ? row["FullName"]?.ToString()?.Trim() ?? "" : "";
-                    string firstName = string.Empty;
-                    string lastName = string.Empty;
+                    var fullName = fullNameCol == null
+                        ? ""
+                        : Cell(row, fullNameCol);
 
-                    if (!string.IsNullOrWhiteSpace(fullName))
-                    {
-                        var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-                        firstName = parts[0];
-                        if (parts.Length > 1) lastName = parts[1];
-                    }
+                    var nameParts = fullName
+                        .Trim()
+                        .Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
 
-                    string roleStr = row.Table.Columns.Contains("Role") ? row["Role"]?.ToString()?.Trim() ?? "Student" : "Student";
-                    if (!Enum.TryParse<UserRole>(roleStr, true, out var role))
+                    var firstName = nameParts.Length > 0
+                        ? nameParts[0]
+                        : null;
+
+                    var lastName = nameParts.Length > 1
+                        ? nameParts[1]
+                        : null;
+
+                    var roleText = roleCol == null
+                        ? "STUDENT"
+                        : Cell(row, roleCol);
+
+                    UserRole role;
+
+                    if (string.IsNullOrWhiteSpace(roleText))
                     {
                         role = UserRole.STUDENT;
                     }
+                    else if (!Enum.TryParse<UserRole>(
+                        roleText.Trim(),
+                        true,
+                        out role))
+                    {
+                        errors.Add(
+                            $"Row {rowNumber}: Invalid role '{roleText}'. User was skipped.");
+                        importedUsernames.Remove(username);
+                        if (!string.IsNullOrWhiteSpace(email))
+                            importedEmails.Remove(email);
+                        rowNumber++;
+                        continue;
+                    }
 
-                    string rawPassword = row.Table.Columns.Contains("Password") ? row["Password"]?.ToString()?.Trim() ?? "" : "";
-                    string passwordToUse = string.IsNullOrWhiteSpace(rawPassword) ? $"{username}@123" : rawPassword;
+                    var rawPassword = passwordCol == null
+                        ? ""
+                        : Cell(row, passwordCol);
 
-                    usersToCreate.Add(new User
+                    var password = string.IsNullOrWhiteSpace(rawPassword)
+                        ? $"{username}@123"
+                        : rawPassword.Trim();
+
+                    users.Add(new User
                     {
                         Username = username,
-                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(passwordToUse),
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
                         Role = role,
+                        FirstName = firstName,
+                        LastName = lastName,
                         Email = string.IsNullOrWhiteSpace(email) ? null : email,
-                        FirstName = string.IsNullOrWhiteSpace(firstName) ? null : firstName,
-                        LastName = string.IsNullOrWhiteSpace(lastName) ? null : lastName,
                         IsActive = true,
+                        IsProfileCompleted = false,
                         CreatedAt = DateTime.UtcNow
                     });
+
+                    existingUsernames.Add(username.ToLower());
+
+                    if (!string.IsNullOrWhiteSpace(email))
+                        existingEmails.Add(email.ToLower());
                 }
+                catch (Exception ex)
+                {
+                    errors.Add($"Row {rowNumber}: {ex.Message}");
+                }
+
+                rowNumber++;
             }
-        }
 
-        if (usersToCreate.Any())
-        {
-            _context.Users.AddRange(usersToCreate);
-            await _context.SaveChangesAsync();
-        }
+            if (users.Count > 0)
+            {
+                await _context.Users.AddRangeAsync(users);
+                await _context.SaveChangesAsync();
+            }
 
-        return Ok(new
+            return Ok(new
+            {
+                message = $"{users.Count} user(s) imported successfully.",
+                createdCount = users.Count,
+                errorCount = errors.Count,
+                errors
+            });
+        }
+        catch (Exception ex)
         {
-            message = $"{usersToCreate.Count} user(s) imported successfully.",
-            createdCount = usersToCreate.Count,
-            errors
-        });
+            // Check your server console for the complete exception.
+            Console.WriteLine(ex);
+
+            return StatusCode(500, new
+            {
+                message = "An error occurred while importing users.",
+                error = ex.Message
+            });
+        }
+    }
+
+    private static string Cell(DataRow row, string column)
+    {
+        if (!row.Table.Columns.Contains(column))
+            return "";
+
+        var value = row[column];
+
+        return value == null || value == DBNull.Value
+            ? ""
+            : value.ToString()?.Trim() ?? "";
+    }
+
+    private static bool IsValidEmail(string email)
+    {
+        try
+        {
+            var address = new MailAddress(email);
+            return address.Address.Equals(
+                email,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     // Helper: JWT Generation

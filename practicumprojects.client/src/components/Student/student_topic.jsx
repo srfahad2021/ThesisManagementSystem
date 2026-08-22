@@ -350,7 +350,7 @@ export default function StudentTopic() {
     );
   }
 
-  const isEditable = topic.status === 'INITIAL' || topic.status === 'DRAFT' || topic.status === 'NEEDS_REVISION';
+  const isEditable = topic.status === 'INITIAL' || topic.status === 'DRAFT' || topic.status === 'NEEDS_REVISION' || topic.status === 'REJECTED';
 
   // CASE 2: Student IS assigned to group(s) -> Show Group Selector and dynamic content
   return (
