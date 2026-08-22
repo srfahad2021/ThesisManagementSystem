@@ -2,14 +2,17 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using PracticumProjects.Server.Data;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args
+});
 
 // ---------------------------------------------------------
 // Configuration
+// ---------------------------------------------------------
 // Disable appsettings file watching (reloadOnChange)
 // because Render's environment has a low inotify limit.
 // ---------------------------------------------------------
@@ -31,7 +34,8 @@ builder.Configuration
 // Database configuration
 // ---------------------------------------------------------
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
@@ -55,17 +59,20 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 
 if (string.IsNullOrWhiteSpace(jwtIssuer))
 {
-    throw new InvalidOperationException("Jwt:Issuer is not configured.");
+    throw new InvalidOperationException(
+        "Jwt:Issuer is not configured.");
 }
 
 if (string.IsNullOrWhiteSpace(jwtAudience))
 {
-    throw new InvalidOperationException("Jwt:Audience is not configured.");
+    throw new InvalidOperationException(
+        "Jwt:Audience is not configured.");
 }
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException("Jwt:Key is not configured.");
+    throw new InvalidOperationException(
+        "Jwt:Key is not configured.");
 }
 
 builder.Services
@@ -81,21 +88,25 @@ builder.Services
     {
         options.MapInboundClaims = false;
 
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
 
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
+                ValidIssuer = jwtIssuer,
+                ValidAudience = jwtAudience,
 
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtKey)),
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtKey)
+                    ),
 
-            RoleClaimType = System.Security.Claims.ClaimTypes.Role
-        };
+                RoleClaimType =
+                    System.Security.Claims.ClaimTypes.Role
+            };
     });
 
 builder.Services.AddAuthorization();
@@ -191,5 +202,9 @@ using (var scope = app.Services.CreateScope())
 // ---------------------------------------------------------
 
 app.MapControllers();
+
+// ---------------------------------------------------------
+// Run
+// ---------------------------------------------------------
 
 app.Run();
