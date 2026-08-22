@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../style.css';
 
-const API_BASE_URL = 'http://localhost:64580/api/EvaluationEditRequest';
+const API_BASE_URL = 'https://thesismanagementsystem-6opj.onrender.com/api/EvaluationEditRequest';
 
 export default function Supervisor_eval_request() {
   const [evaluatedGroups, setEvaluatedGroups] = useState([]);

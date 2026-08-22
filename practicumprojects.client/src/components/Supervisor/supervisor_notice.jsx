@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import '../style.css';
 import { NoticeCard, NoticeModal } from '../NoticeComponents';
 
-const API_BASE = 'http://localhost:64580/api';
+const API_BASE = 'https://thesismanagementsystem-6opj.onrender.com/api';
 const PAGE_SIZE = 10;
 
 export default function Supervisor_notice() {

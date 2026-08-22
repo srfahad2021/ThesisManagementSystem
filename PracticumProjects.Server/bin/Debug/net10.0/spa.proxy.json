@@ -1,6 +1,6 @@
 {
 "SpaProxyServer": {
-"ServerUrl": "https://localhost:64580",
+"ServerUrl": "https://thesismanagementsystem-6opj.onrender.com",
 "RedirectUrl": "",
 "LaunchCommand": "npm run dev",
 "WorkingDirectory": "C:\\Users\\srfah\\source\\repos\\PracticumProjects\\practicumprojects.server\\..\\practicumprojects.client",

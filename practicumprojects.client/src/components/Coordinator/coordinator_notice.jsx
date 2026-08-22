@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../style.css';
 import { NoticeCard, NoticeModal } from '../NoticeComponents';
 
-const API_BASE = 'http://localhost:64580/api';
+const API_BASE = 'https://thesismanagementsystem-6opj.onrender.com/api';
 
 export default function Coordinator_notice() {
   const [notices, setNotices] = useState([]);
