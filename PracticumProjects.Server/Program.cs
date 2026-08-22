@@ -10,12 +10,12 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     Args = args
 });
 
-// ---------------------------------------------------------
-// Configuration
-// ---------------------------------------------------------
-// Disable appsettings file watching (reloadOnChange)
-// because Render's environment has a low inotify limit.
-// ---------------------------------------------------------
+// =========================================================
+// CONFIGURATION
+// =========================================================
+// Disable configuration file watching.
+// Render has a limited inotify instance limit.
+// =========================================================
 
 builder.Configuration.Sources.Clear();
 
@@ -30,9 +30,9 @@ builder.Configuration
         reloadOnChange: false)
     .AddEnvironmentVariables();
 
-// ---------------------------------------------------------
-// Database configuration
-// ---------------------------------------------------------
+// =========================================================
+// DATABASE
+// =========================================================
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection");
@@ -44,14 +44,16 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
     options.UseMySql(
         connectionString,
         ServerVersion.AutoDetect(connectionString)
-    ));
+    );
+});
 
-// ---------------------------------------------------------
-// JWT Authentication
-// ---------------------------------------------------------
+// =========================================================
+// JWT AUTHENTICATION
+// =========================================================
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
@@ -111,9 +113,9 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// ---------------------------------------------------------
-// Controllers / JSON
-// ---------------------------------------------------------
+// =========================================================
+// CONTROLLERS / JSON
+// =========================================================
 
 builder.Services
     .AddControllers()
@@ -123,15 +125,21 @@ builder.Services
             new JsonStringEnumConverter());
     });
 
-// ---------------------------------------------------------
-// OpenAPI / Swagger
-// ---------------------------------------------------------
+// =========================================================
+// OPENAPI
+// =========================================================
 
 builder.Services.AddOpenApi();
 
-// ---------------------------------------------------------
+// =========================================================
 // CORS
-// ---------------------------------------------------------
+// =========================================================
+// Frontend:
+// https://thesis-management-system-one.vercel.app
+//
+// Backend:
+// https://thesismanagementsystem-6opj.onrender.com
+// =========================================================
 
 builder.Services.AddCors(options =>
 {
@@ -146,65 +154,83 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ---------------------------------------------------------
-// Build application
-// ---------------------------------------------------------
+// =========================================================
+// BUILD APPLICATION
+// =========================================================
 
 var app = builder.Build();
 
-// ---------------------------------------------------------
-// Development-only configuration
-// ---------------------------------------------------------
+// =========================================================
+// DEVELOPMENT
+// =========================================================
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 
-    // Keep local SPA integration working
     app.UseDefaultFiles();
     app.MapStaticAssets();
 }
 
-// ---------------------------------------------------------
-// Middleware
-// ---------------------------------------------------------
+// =========================================================
+// MIDDLEWARE
+// =========================================================
+
+// IMPORTANT:
+// CORS must run before Authentication/Authorization.
+
+app.UseCors("AllowFrontend");
+
+// =========================================================
+// HTTPS
+// =========================================================
+
+// Render already provides HTTPS at the public URL.
+// Keep this enabled if your Render ASP.NET setup correctly
+// handles forwarded HTTPS headers.
+//
+// If you continue getting redirect-related CORS errors,
+// temporarily disable this middleware.
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowFrontend");
+// =========================================================
+// AUTHENTICATION / AUTHORIZATION
+// =========================================================
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ---------------------------------------------------------
-// Development SPA fallback
-// ---------------------------------------------------------
+// =========================================================
+// DEVELOPMENT SPA FALLBACK
+// =========================================================
 
 if (app.Environment.IsDevelopment())
 {
     app.MapFallbackToFile("/index.html");
 }
 
-// ---------------------------------------------------------
-// Database migration
-// ---------------------------------------------------------
+// =========================================================
+// DATABASE MIGRATION
+// =========================================================
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider
-        .GetRequiredService<ApplicationDbContext>();
+    var db =
+        scope.ServiceProvider
+            .GetRequiredService<ApplicationDbContext>();
 
     db.Database.Migrate();
 }
 
-// ---------------------------------------------------------
-// Controllers
-// ---------------------------------------------------------
+// =========================================================
+// CONTROLLERS
+// =========================================================
 
 app.MapControllers();
 
-// ---------------------------------------------------------
-// Run
-// ---------------------------------------------------------
+// =========================================================
+// RUN
+// =========================================================
 
 app.Run();
