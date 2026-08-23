@@ -41,7 +41,7 @@ export default function SupervisorAssignments() {
   const fetchAssignments = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('/api/Assignment/supervisor-assignments', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Assignment/supervisor-assignments`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -58,7 +58,7 @@ export default function SupervisorAssignments() {
   const fetchSupervisedGroups = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('/api/Assignment/supervised-groups', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Assignment/supervised-groups`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -76,7 +76,7 @@ export default function SupervisorAssignments() {
   const fetchAssignmentFiles = async (assignmentId) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`/api/Assignment/${assignmentId}/files`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Assignment/${assignmentId}/files`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -129,7 +129,7 @@ export default function SupervisorAssignments() {
 
     try {
       const token = getAuthToken();
-      const response = await fetch(`/api/Assignment/file/${fileId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Assignment/file/${fileId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -167,7 +167,7 @@ export default function SupervisorAssignments() {
 
     try {
       const token = getAuthToken();
-      const url = editingAssignmentId ? `/api/Assignment/${editingAssignmentId}` : '/api/Assignment';
+      const url = editingAssignmentId ? `${import.meta.env.VITE_API_URL}/api/Assignment/${editingAssignmentId}` : `${import.meta.env.VITE_API_URL}/api/Assignment`;
       const method = editingAssignmentId ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -195,7 +195,7 @@ export default function SupervisorAssignments() {
 
     try {
       const token = getAuthToken();
-      const response = await fetch(`/api/Assignment/${assignmentId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Assignment/${assignmentId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -56,8 +56,8 @@ export default function Boards() {
       const config = getAuthConfig();
 
       const [boardRes, semRes] = await Promise.all([
-        axios.get('/api/board', config),
-        axios.get('/api/semester/active', config)
+        axios.get(`${import.meta.env.VITE_API_URL}/api/board`, config),
+        axios.get(`${import.meta.env.VITE_API_URL}/api/semester/active`, config)
       ]);
 
       setBoards(boardRes.data || []);
@@ -102,7 +102,7 @@ export default function Boards() {
   const handleToggleStatus = async (board) => {
     const newStatus = !board.isActive;
     try {
-      await axios.put(`/api/board/${board.id}/status`, { isActive: newStatus }, getAuthConfig());
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/board/${board.id}/status`, { isActive: newStatus }, getAuthConfig());
       setBoards((prev) =>
         prev.map((b) => (b.id === board.id ? { ...b, isActive: newStatus } : b))
       );
@@ -119,7 +119,7 @@ export default function Boards() {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`/api/board/${board.id}`, getAuthConfig());
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/board/${board.id}`, getAuthConfig());
       setBoards((prev) => prev.filter((b) => b.id !== board.id));
     } catch (err) {
       console.error('Failed to delete board:', err);
@@ -296,7 +296,7 @@ function CreateBoardModal({ semesters, onClose, onSuccess }) {
         semesterId: formData.semesterId ? parseInt(formData.semesterId, 10) : null
       };
 
-      const response = await axios.post('/api/board/singleboardcreation', payload, getAuthConfig());
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/board/singleboardcreation`, payload, getAuthConfig());
       onSuccess(response.data);
     } catch (err) {
       console.error(err);
@@ -320,7 +320,7 @@ function CreateBoardModal({ semesters, onClose, onSuccess }) {
       fileData.append('file', excelFile);
 
       const token = sessionStorage.getItem('token');
-      await axios.post('/api/board/bulk-excel', fileData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/board/bulk-excel`, fileData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -474,7 +474,7 @@ function BoardEditModal({ board, semesters, onClose, onSuccess }) {
         semesterId: formData.semesterId ? parseInt(formData.semesterId, 10) : null
       };
 
-      await axios.put(`/api/board/${board.id}`, payload, getAuthConfig());
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/board/${board.id}`, payload, getAuthConfig());
       onSuccess();
     } catch (err) {
       console.error(err);

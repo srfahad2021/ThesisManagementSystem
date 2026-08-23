@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../style.css';
 
-const API_BASE_URL = 'https://thesismanagementsystem-6opj.onrender.com/api/ExaminerEvaluation';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/ExaminerEvaluation`;
 
 export default function StudentEvaluation() {
   const [studentGroups, setStudentGroups] = useState([]);

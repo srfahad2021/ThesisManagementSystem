@@ -23,7 +23,7 @@ export default function StudentProgress() {
       setIsLoading(true);
       const token = sessionStorage.getItem("token"); 
 
-      const response = await fetch("/api/Group/my-groups", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Group/my-groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -48,7 +48,7 @@ export default function StudentProgress() {
   const fetchWeeklyReports = async (groupId) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/WeeklyReports/group/${groupId}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/WeeklyReports/group/${groupId}`);
       if (response.ok) {
         const data = await response.json();
         const map = {};
@@ -128,7 +128,7 @@ export default function StudentProgress() {
     if (!window.confirm("Are you sure you want to delete this attachment?")) return;
 
     try {
-      const response = await fetch(`/api/WeeklyReports/delete-file/${fileId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/WeeklyReports/delete-file/${fileId}`, {
         method: 'DELETE',
       });
 
@@ -172,7 +172,7 @@ export default function StudentProgress() {
         formData.append('files', file);
       });
 
-      const response = await fetch('/api/WeeklyReports/submit', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/WeeklyReports/submit`, {
         method: 'POST',
         body: formData,
       });
@@ -361,7 +361,7 @@ export default function StudentProgress() {
                       {activeReport.files.map((file) => (
                         <div key={file.fileId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}>
                           <span>{file.fileName} <span className="text-muted" style={{ fontSize: '11px' }}>({(file.fileSize / 1024).toFixed(1)} KB)</span></span>
-                          <a href={`/api/WeeklyReports/download-file/${file.fileId}`} download style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>
+                          <a href={`${import.meta.env.VITE_API_URL}/api/WeeklyReports/download-file/${file.fileId}`} download style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>
                             Download
                           </a>
                         </div>

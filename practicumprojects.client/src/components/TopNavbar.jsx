@@ -34,7 +34,7 @@ function UserEditPopup({ isOpen, user, onClose, onSuccess }) {
     const userId = user.userId || user.id || user._id;
 
     try {
-      const response = await fetch(`/api/user/editprofile/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/editprofile/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ function PasswordChangePopup({ isOpen, user, onClose, onSuccess }) {
     const userId = user.userId || user.id || user._id;
 
     try {
-      const response = await fetch(`/api/auth/${userId}/change-password`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/${userId}/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -36,7 +36,7 @@ export default function StudentAssignments() {
   const fetchStudentGroups = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('/api/ThesisGroup/my-groups', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ThesisGroup/my-groups`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -55,7 +55,7 @@ export default function StudentAssignments() {
     setLoading(true);
     try {
       const token = getAuthToken();
-      const response = await fetch(`/api/Assignment/group/${groupId}/assignments`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Assignment/group/${groupId}/assignments`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -82,7 +82,7 @@ export default function StudentAssignments() {
   const handleDownloadFile = async (fileId, fileName) => {
     try {
         const token = getAuthToken();
-        const response = await fetch(`/api/SubmissionFile/download/${fileId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/download/${fileId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -123,7 +123,7 @@ export default function StudentAssignments() {
 
     try {
       const token = getAuthToken();
-      const response = await fetch('/api/Assignment/submit', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Assignment/submit`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
@@ -257,7 +257,7 @@ export default function StudentAssignments() {
 
                                     try {
                                       const token = getAuthToken();
-                                      const res = await fetch(`/api/Assignment/submission/${item.assignmentId}`, {
+                                      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/Assignment/submission/${item.assignmentId}`, {
                                         headers: { 'Authorization': `Bearer ${token}` }
                                       });
                                       if (res.ok) {

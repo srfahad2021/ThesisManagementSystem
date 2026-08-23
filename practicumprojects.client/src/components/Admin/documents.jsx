@@ -33,7 +33,7 @@ export default function AllGroupsList() {
       setLoading(true);
       setError('');
 
-      const response = await fetch('/api/Group', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Group`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -59,7 +59,7 @@ export default function AllGroupsList() {
     setGroupDocs([]);
 
     try {
-      const response = await fetch(`/api/SubmissionFile/module/DocumentSubmission/${group.groupId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/module/DocumentSubmission/${group.groupId}`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -80,7 +80,7 @@ export default function AllGroupsList() {
   // 3. Download Document
   const handleDownload = async (fileId) => {
     try {
-      const response = await fetch(`/api/SubmissionFile/download/${fileId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/download/${fileId}`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });

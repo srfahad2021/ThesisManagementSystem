@@ -60,7 +60,7 @@ export default function Semesters() {
     setIsLoading(true);
     try {
       const token = sessionStorage.getItem('token');
-      const response = await fetch('/api/semester', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/semester`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -139,7 +139,7 @@ export default function Semesters() {
       };
 
       const isEdit = !!editingSemester;
-      const url = isEdit ? `/api/semester/${editingSemester.semesterId}` : '/api/semester';
+      const url = isEdit ? `${import.meta.env.VITE_API_URL}/api/semester/${editingSemester.semesterId}` : `${import.meta.env.VITE_API_URL}/api/semester`;
       const method = isEdit ? 'PUT' : 'POST';
 
       const response = await fetch(url, {

@@ -61,8 +61,8 @@ export default function CoordinatorGroups() {
       setLoading(true);
       const config = getAuthConfig();
       const [boardsRes, groupsRes] = await Promise.all([
-        axios.get('/api/board/active-groups-summary', config),
-        axios.get('/api/board/unassigned-groups', config)
+        axios.get(`${import.meta.env.VITE_API_URL}/api/board/active-groups-summary`, config),
+        axios.get(`${import.meta.env.VITE_API_URL}/api/board/unassigned-groups`, config)
       ]);
 
       setBoards(boardsRes.data || []);
@@ -110,7 +110,7 @@ export default function CoordinatorGroups() {
 
     try {
       const config = getAuthConfig();
-      const res = await axios.get(`/api/board/${board.id}/groups`, config);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/board/${board.id}/groups`, config);
       setAssignedBoardGroups(res.data || []);
     } catch (err) {
       console.error('Error fetching board assigned groups:', err);
@@ -142,7 +142,7 @@ export default function CoordinatorGroups() {
       const parsedGroupId = parseInt(selectedGroupId, 10);
 
       const res = await axios.post(
-        `/api/board/${selectedBoard.id}/groups`,
+        `${import.meta.env.VITE_API_URL}/api/board/${selectedBoard.id}/groups`,
         { groupId: parsedGroupId },
         config
       );
@@ -176,7 +176,7 @@ export default function CoordinatorGroups() {
 
     try {
       const config = getAuthConfig();
-      await axios.delete(`/api/board/groups/${boardGroupId}`, config);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/board/groups/${boardGroupId}`, config);
 
       const removedItem = assignedBoardGroups.find((g) => g.boardGroupId === boardGroupId);
 

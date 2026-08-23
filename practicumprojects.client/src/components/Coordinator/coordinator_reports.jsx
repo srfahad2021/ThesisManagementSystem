@@ -26,7 +26,7 @@ export default function CoordinatorReports() {
       setIsLoading(true);
       const token = sessionStorage.getItem("token");
 
-      const response = await fetch("/api/WeeklyReports/coordinator/groups", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/WeeklyReports/coordinator/groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export default function CoordinatorReports() {
     setFeedback('');
     try {
       const token = sessionStorage.getItem("token");
-      const response = await fetch(`/api/WeeklyReports/group/${group.groupId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/WeeklyReports/group/${group.groupId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -129,7 +129,7 @@ export default function CoordinatorReports() {
       setIsSubmittingAction(true);
       const token = sessionStorage.getItem("token");
 
-      const response = await fetch(`/api/WeeklyReports/coordinator/review/${activeReport.reportId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/WeeklyReports/coordinator/review/${activeReport.reportId}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -411,7 +411,7 @@ export default function CoordinatorReports() {
                             <div key={file.fileId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}>
                               <span>📄 {file.fileName} <span className="text-muted" style={{ fontSize: '11px' }}>({(file.fileSize / 1024).toFixed(1)} KB)</span></span>
                               <a
-                                href={`/api/WeeklyReports/download-file/${file.fileId}`}
+                                href={`${import.meta.env.VITE_API_URL}/api/WeeklyReports/download-file/${file.fileId}`}
                                 download
                                 style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}
                               >

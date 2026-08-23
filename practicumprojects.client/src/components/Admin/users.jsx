@@ -65,7 +65,7 @@ export default function Users() {
     setError('');
     try {
       const token = getAuthToken();
-      const response = await fetch('/api/user', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user`, {
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -112,7 +112,7 @@ export default function Users() {
 
     try {
       const token = getAuthToken();
-      const response = await fetch('/api/auth/bulk-create', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/bulk-create`, {
         method: 'POST',
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -154,7 +154,7 @@ export default function Users() {
     const token = getAuthToken();
 
     try {
-      const response = await fetch(`/api/auth/${userId}/reset-password`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/${userId}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export default function Users() {
     const newIsActive = isCurrentlyDisabled;
 
     try {
-      const response = await fetch(`/api/user/${userId}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/${userId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -541,7 +541,7 @@ function UserCreatePopup({ isOpen, onClose, onSuccess }) {
     };
 
     try {
-      const response = await fetch('/api/auth/create-user', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/create-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -576,7 +576,7 @@ function UserCreatePopup({ isOpen, onClose, onSuccess }) {
     bodyData.append('file', selectedFile);
 
     try {
-      const response = await fetch('/api/auth/bulk-create', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/bulk-create`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${getAuthToken()}`
@@ -833,7 +833,7 @@ function UserEditPopup({ isOpen, user, onClose, onSuccess }) {
     const userId = user.userId || user.id || user._id;
 
     try {
-      const response = await fetch(`/api/user/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -108,7 +108,7 @@ export default function SupervisorTopics() {
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const response = await fetch('/api/TopicSubmission/supervisor', { headers });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/TopicSubmission/supervisor`, { headers });
 
       if (response.ok) {
         const data = await response.json();
@@ -132,7 +132,7 @@ export default function SupervisorTopics() {
       const headers = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const response = await fetch(`/api/SubmissionFile?moduleType=TopicSubmission&entityId=${topicId}`, { headers });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile?moduleType=TopicSubmission&entityId=${topicId}`, { headers });
       if (response.ok) {
         const files = await response.json();
         setTopicFiles(files);
@@ -153,7 +153,7 @@ export default function SupervisorTopics() {
       const headers = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const response = await fetch(`/api/SubmissionFile/download/${fileId}`, { headers });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/download/${fileId}`, { headers });
 
       if (!response.ok) {
         const err = await response.json().catch(() => null);
@@ -199,7 +199,7 @@ export default function SupervisorTopics() {
         supervisorFeedback: customFeedback !== undefined ? customFeedback : feedback
       };
 
-      const response = await fetch(`/api/TopicSubmission/${topicId}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/TopicSubmission/${topicId}/status`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify(body)

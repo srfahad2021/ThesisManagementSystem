@@ -71,8 +71,8 @@ export default function SupervisorMeetings() {
     setLoading(true);
     try {
       const [meetingsRes, slotsRes] = await Promise.all([
-        authFetch(`/api/Meetings/host/${currentUserId}`),
-        authFetch(`/api/AvailableTimes/user/${currentUserId}`) 
+        authFetch(`${import.meta.env.VITE_API_URL}/api/Meetings/host/${currentUserId}`),
+        authFetch(`${import.meta.env.VITE_API_URL}/api/AvailableTimes/user/${currentUserId}`) 
       ]);
 
       if (meetingsRes.ok) setMeetings(await meetingsRes.json());
@@ -98,7 +98,7 @@ export default function SupervisorMeetings() {
     }
 
     try {
-      const res = await authFetch('/api/AvailableTimes', {
+      const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/AvailableTimes`, {
         method: 'POST',
         body: JSON.stringify({
           userId: currentUserId,
@@ -122,7 +122,7 @@ export default function SupervisorMeetings() {
 
   const handleRemoveSlot = async (id) => {
     try {
-      const res = await authFetch(`/api/AvailableTimes/${id}`, { method: 'DELETE' });
+      const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/AvailableTimes/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setAvailableSlots(availableSlots.filter(s => s.availabilityId !== id));
       }
@@ -133,7 +133,7 @@ export default function SupervisorMeetings() {
 
   const handleUpdateStatus = async (meetingId, status, reason = null) => {
     try {
-      const res = await authFetch(`/api/Meetings/${meetingId}/status`, {
+      const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/Meetings/${meetingId}/status`, {
         method: 'PUT',
         body: JSON.stringify({ status, rejectionReason: reason })
       });

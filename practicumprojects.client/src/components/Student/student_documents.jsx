@@ -87,7 +87,7 @@ export default function StudentDocuments({ moduleType = 'DocumentSubmission' }) 
   const fetchStudentGroups = async () => {
     try {
       setLoadingGroups(true);
-      const response = await fetch('/api/Group/my-groups', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Group/my-groups`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -112,7 +112,7 @@ export default function StudentDocuments({ moduleType = 'DocumentSubmission' }) 
   const fetchDocuments = async (groupId) => {
     try {
       setLoadingDocs(true);
-      const response = await fetch(`/api/SubmissionFile/module/${moduleType}/${groupId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/module/${moduleType}/${groupId}`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -160,7 +160,7 @@ export default function StudentDocuments({ moduleType = 'DocumentSubmission' }) 
     formData.append('file', fileWithTitle);
 
     try {
-      const response = await fetch('/api/SubmissionFile/upload', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/upload`, {
         method: 'POST',
         headers: getAuthHeaders(),
         credentials: 'include',
@@ -187,7 +187,7 @@ export default function StudentDocuments({ moduleType = 'DocumentSubmission' }) 
   // Download File
   const handleDownload = async (fileId) => {
     try {
-      const response = await fetch(`/api/SubmissionFile/download/${fileId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/download/${fileId}`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -213,7 +213,7 @@ export default function StudentDocuments({ moduleType = 'DocumentSubmission' }) 
     if (!window.confirm('Are you sure you want to delete this document?')) return;
 
     try {
-      const response = await fetch(`/api/SubmissionFile/${fileId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/${fileId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
         credentials: 'include',

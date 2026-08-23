@@ -33,7 +33,7 @@ export default function Admin_eval_request() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/all-requests`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/all-requests`, {
         method: 'GET',
         headers: getAuthHeader()
       });
@@ -57,7 +57,7 @@ export default function Admin_eval_request() {
     const remarks = remarksMap[requestId] || '';
 
     try {
-      const response = await fetch(`${API_BASE_URL}/process-request`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/process-request`, {
         method: 'POST',
         headers: getAuthHeader(),
         body: JSON.stringify({

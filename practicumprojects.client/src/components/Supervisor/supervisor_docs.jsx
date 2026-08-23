@@ -36,7 +36,7 @@ export default function SupervisorDocs() {
   const fetchSupervisorGroups = async () => {
     try {
       setLoadingGroups(true);
-      const response = await fetch('/api/Group/my-groups', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Group/my-groups`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -92,7 +92,7 @@ export default function SupervisorDocs() {
     setGroupDocs([]);
 
     try {
-      const response = await fetch(`/api/SubmissionFile/module/DocumentSubmission/${group.groupId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/module/DocumentSubmission/${group.groupId}`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -113,7 +113,7 @@ export default function SupervisorDocs() {
   // 3. Download Document
   const handleDownload = async (fileId) => {
     try {
-      const response = await fetch(`/api/SubmissionFile/download/${fileId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/download/${fileId}`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -151,7 +151,7 @@ export default function SupervisorDocs() {
     setReviewError('');
 
     try {
-      const response = await fetch(`/api/SubmissionFile/review/${selectedDoc.fileId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/review/${selectedDoc.fileId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

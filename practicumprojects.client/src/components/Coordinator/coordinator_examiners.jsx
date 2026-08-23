@@ -57,8 +57,8 @@ export default function CoordinatorExaminers() {
       setLoading(true);
       const config = getAuthConfig();
       const [boardsRes, examinersRes] = await Promise.all([
-        axios.get('/api/board/active', config),
-        axios.get('/api/board/eligible-examiners', config)
+        axios.get(`${import.meta.env.VITE_API_URL}/api/board/active`, config),
+        axios.get(`${import.meta.env.VITE_API_URL}/api/board/eligible-examiners`, config)
       ]);
 
       setBoards(boardsRes.data || []);
@@ -114,7 +114,7 @@ export default function CoordinatorExaminers() {
       const config = getAuthConfig();
 
       const res = await axios.post(
-        `/api/board/${selectedBoard.id}/members`,
+        `${import.meta.env.VITE_API_URL}/api/board/${selectedBoard.id}/members`,
         { userId: parseInt(selectedUserId, 10) },
         config
       );
@@ -153,7 +153,7 @@ export default function CoordinatorExaminers() {
 
     try {
       const config = getAuthConfig();
-      await axios.delete(`/api/board/members/${boardMemberId}`, config);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/board/members/${boardMemberId}`, config);
 
       const updatedMembers = selectedBoard.members.filter(
         (m) => m.boardMemberId !== boardMemberId

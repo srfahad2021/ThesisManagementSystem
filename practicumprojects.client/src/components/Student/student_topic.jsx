@@ -51,7 +51,7 @@ export default function StudentTopic() {
       setLoading(true);
       setMessage(null);
 
-      const response = await fetch('/api/ThesisGroup/my-groups', { headers: getHeaders() });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ThesisGroup/my-groups`, { headers: getHeaders() });
       if (response.ok) {
         const data = await response.json();
         const userGroups = data || [];
@@ -63,7 +63,7 @@ export default function StudentTopic() {
         }
       } else {
         // Fallback endpoint if specific API is not implemented
-        const fallbackRes = await fetch('/api/ThesisGroup', { headers: getHeaders() });
+        const fallbackRes = await fetch(`${import.meta.env.VITE_API_URL}/api/ThesisGroup`, { headers: getHeaders() });
         if (fallbackRes.ok) {
           const fallbackData = await fallbackRes.json();
           setGroups(fallbackData || []);
@@ -86,7 +86,7 @@ export default function StudentTopic() {
       setLoadingTopic(true);
       setMessage(null);
 
-      const response = await fetch(`/api/TopicSubmission/group/${groupId}`, { 
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/TopicSubmission/group/${groupId}`, { 
         headers: getHeaders() 
       });
 
@@ -123,7 +123,7 @@ export default function StudentTopic() {
 
   const fetchAttachments = async (topicId) => {
     try {
-      const response = await fetch(`/api/SubmissionFile?moduleType=TopicSubmission&entityId=${topicId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile?moduleType=TopicSubmission&entityId=${topicId}`, {
         headers: getHeaders()
       });
       if (response.ok) {
@@ -174,7 +174,7 @@ export default function StudentTopic() {
       formData.append('moduleType', 'TopicSubmission');
       formData.append('entityId', topic.topicId);
 
-      const response = await fetch('/api/SubmissionFile/upload', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/upload`, {
         method: 'POST',
         headers: getHeaders(),
         body: formData
@@ -206,7 +206,7 @@ export default function StudentTopic() {
     if (!window.confirm('Are you sure you want to delete this attachment?')) return;
 
     try {
-      const response = await fetch(`/api/SubmissionFile/${fileId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/SubmissionFile/${fileId}`, {
         method: 'DELETE',
         headers: getHeaders()
       });
@@ -243,8 +243,8 @@ export default function StudentTopic() {
       };
 
       const url = topic.topicId > 0 
-        ? `/api/TopicSubmission/${topic.topicId}`
-        : `/api/TopicSubmission`;
+        ? `${import.meta.env.VITE_API_URL}/api/TopicSubmission/${topic.topicId}`
+        : `${import.meta.env.VITE_API_URL}/api/TopicSubmission`;
 
       const method = topic.topicId > 0 ? 'PUT' : 'POST';
 
@@ -538,7 +538,7 @@ export default function StudentTopic() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <span>📄</span>
                             <a 
-                              href={file.filePath || `/api/SubmissionFile/download/${file.fileId}`} 
+                              href={file.filePath || `${import.meta.env.VITE_API_URL}/api/SubmissionFile/download/${file.fileId}`} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               style={{ textDecoration: 'none', color: '#0056b3', fontWeight: '500' }}

@@ -40,7 +40,7 @@ export default function GroupProgressView() {
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const response = await fetch("/api/Group", { headers });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Group`, { headers });
       if (!response.ok) throw new Error("Failed to fetch groups");
 
       const data = await response.json();
@@ -59,7 +59,7 @@ export default function GroupProgressView() {
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const response = await fetch(`/api/WeeklyReports/group/${groupId}`, { headers });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/WeeklyReports/group/${groupId}`, { headers });
       if (response.ok) {
         const data = await response.json();
         const map = {};
@@ -381,7 +381,7 @@ export default function GroupProgressView() {
                             {activeReport.files.map((file) => (
                               <div key={file.fileId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}>
                                 <span>📄 {file.fileName} <span className="text-muted" style={{ fontSize: '11px' }}>({(file.fileSize / 1024).toFixed(1)} KB)</span></span>
-                                <a href={`/api/WeeklyReports/download-file/${file.fileId}`} download style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>
+                                <a href={`${import.meta.env.VITE_API_URL}/api/WeeklyReports/download-file/${file.fileId}`} download style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>
                                   Download
                                 </a>
                               </div>

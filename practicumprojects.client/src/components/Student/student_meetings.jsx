@@ -85,9 +85,9 @@ export default function StudentMeetings() {
   const fetchStudentGroups = async () => {
     setLoading(true);
     try {
-      let res = await authFetch('/api/Group/my-groups');
+      let res = await authFetch(`${import.meta.env.VITE_API_URL}/api/Group/my-groups`);
       if (!res.ok) {
-        res = await authFetch(`/api/Groups/student/${currentStudentId}`);
+        res = await authFetch(`${import.meta.env.VITE_API_URL}/api/Groups/student/${currentStudentId}`);
       }
 
       if (res.ok) {
@@ -109,7 +109,7 @@ export default function StudentMeetings() {
 
   const fetchMeetings = async (groupId) => {
     try {
-      let res = await authFetch(`/api/Meetings/group/${groupId}`);
+      let res = await authFetch(`${import.meta.env.VITE_API_URL}/api/Meetings/group/${groupId}`);
 
       if (res.ok) {
         const data = await res.json();
@@ -126,13 +126,13 @@ export default function StudentMeetings() {
     setLoadingSlots(true);
     try {
       let url = dateStr 
-        ? `/api/AvailableTimes/supervisor/${supervisorId}?date=${dateStr}` 
-        : `/api/AvailableTimes/user/${supervisorId}`;
+        ? `${import.meta.env.VITE_API_URL}/api/AvailableTimes/supervisor/${supervisorId}?date=${dateStr}` 
+        : `${import.meta.env.VITE_API_URL}/api/AvailableTimes/user/${supervisorId}`;
       
       let res = await authFetch(url);
       
       if (!res.ok) {
-        res = await authFetch(`/api/AvailableTimes/user/${supervisorId}`);
+        res = await authFetch(`${import.meta.env.VITE_API_URL}/api/AvailableTimes/user/${supervisorId}`);
       }
 
       if (res.ok) {
@@ -207,7 +207,7 @@ export default function StudentMeetings() {
     };
 
     try {
-      const res = await authFetch('/api/Meetings/request', {
+      const res = await authFetch('${import.meta.env.VITE_API_URL}/api/Meetings/request', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
@@ -254,7 +254,7 @@ export default function StudentMeetings() {
 
   const handleSaveSummary = async () => {
     try {
-      const res = await authFetch(`/api/Meetings/${selectedMeetingId}/summary`, {
+      const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/Meetings/${selectedMeetingId}/summary`, {
         method: 'POST',
         body: JSON.stringify({
           submittedBy: currentStudentId,

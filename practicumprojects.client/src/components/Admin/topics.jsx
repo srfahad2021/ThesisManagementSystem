@@ -149,7 +149,7 @@ export default function Topics() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/TopicSubmission/all', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/TopicSubmission/all`, {
         headers
       });
 
@@ -187,7 +187,7 @@ export default function Topics() {
       }
 
       const response = await fetch(
-        `/api/SubmissionFile?moduleType=TopicSubmission&entityId=${topicId}`,
+        `${import.meta.env.VITE_API_URL}/api/SubmissionFile?moduleType=TopicSubmission&entityId=${topicId}`,
         { headers }
       );
 
@@ -216,7 +216,7 @@ export default function Topics() {
       }
 
       const response = await fetch(
-        `/api/SubmissionFile/download/${fileId}`,
+        `${import.meta.env.VITE_API_URL}/api/SubmissionFile/download/${fileId}`,
         { headers }
       );
 

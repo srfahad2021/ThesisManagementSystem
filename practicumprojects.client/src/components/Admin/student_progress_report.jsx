@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const API_BASE_URL = "/api/student-progress-report";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/student-progress-report`;
 
 const StudentProgressReport = () => {
     const [groups, setGroups] = useState([]);

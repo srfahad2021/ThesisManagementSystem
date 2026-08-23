@@ -37,8 +37,8 @@ export default function Groups() {
       };
 
       const [groupsRes, usersRes] = await Promise.all([
-        fetch('/api/group', { headers }),
-        fetch('/api/group/eligible-users', { headers })
+        fetch(`${import.meta.env.VITE_API_URL}/api/group`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/group/eligible-users`, { headers })
       ]);
 
       if (groupsRes.ok) {
@@ -89,7 +89,7 @@ export default function Groups() {
     try {
       const token = sessionStorage.getItem('token');
       
-      const response = await fetch('/api/group', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/group`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -123,7 +123,7 @@ export default function Groups() {
 
     try {
       const token = sessionStorage.getItem('token');
-      const response = await fetch(`/api/group/${groupId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/group/${groupId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
